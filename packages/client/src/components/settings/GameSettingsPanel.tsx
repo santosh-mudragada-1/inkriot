@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
-import { DRAW_SECONDS_OPTIONS, GAME_MODE_OPTIONS, PLAYERS_OPTIONS, ROUNDS_OPTIONS, WORD_CHOICES_OPTIONS } from "@inkriot/shared";
+import { DRAW_SECONDS_OPTIONS, GAME_MODE_OPTIONS, PLAYERS_OPTIONS, PROMPT_LENGTH_OPTIONS, ROUNDS_OPTIONS } from "@inkriot/shared";
 import { useGameStore } from "../../store/useGameStore";
 import { socket } from "../../lib/socket";
 import { Button } from "../common/Button";
-import { IconGameMode, IconPlayers, IconRounds, IconStopwatch, IconWordChoices } from "../icons/DoodleIcons";
+import { IconGameMode, IconPlayers, IconPromptLength, IconRounds, IconStopwatch } from "../icons/DoodleIcons";
 import { PlayfulSelect } from "./PlayfulSelect";
 import { PaperDoodles } from "./PaperDoodles";
 import "./GameSettingsPanel.css";
@@ -12,7 +12,7 @@ const PLAYERS_SELECT_OPTIONS = PLAYERS_OPTIONS.map((n) => ({ value: n, label: St
 const DRAW_SECONDS_SELECT_OPTIONS = DRAW_SECONDS_OPTIONS.map((n) => ({ value: n, label: `${n}s` }));
 const ROUNDS_SELECT_OPTIONS = ROUNDS_OPTIONS.map((n) => ({ value: n, label: String(n) }));
 const GAME_MODE_SELECT_OPTIONS = GAME_MODE_OPTIONS.map((o) => ({ value: o.value, label: o.label }));
-const WORD_CHOICES_SELECT_OPTIONS = WORD_CHOICES_OPTIONS.map((n) => ({ value: n, label: String(n) }));
+const PROMPT_LENGTH_SELECT_OPTIONS = PROMPT_LENGTH_OPTIONS.map((n) => ({ value: n, label: n === 1 ? "1 word" : `up to ${n}` }));
 
 export function GameSettingsPanel() {
   const room = useGameStore((s) => s.room)!;
@@ -71,12 +71,12 @@ export function GameSettingsPanel() {
           />
           <div className="settings-divider" />
           <PlayfulSelect
-            icon={<IconWordChoices />}
+            icon={<IconPromptLength />}
             accent="var(--color-mint)"
-            label="Word choices"
-            value={settings.wordChoiceCount}
-            options={WORD_CHOICES_SELECT_OPTIONS}
-            onChange={(v) => update({ wordChoiceCount: v })}
+            label="Prompt length"
+            value={settings.maxPromptWords}
+            options={PROMPT_LENGTH_SELECT_OPTIONS}
+            onChange={(v) => update({ maxPromptWords: v })}
           />
         </div>
 

@@ -42,8 +42,8 @@ export interface GameSettings {
   totalRounds: number;
   drawSeconds: number;
   gameMode: GameMode;
-  /** How many word options the artist is offered each turn. */
-  wordChoiceCount: number;
+  /** Longest a word prompt's phrase can be, in words (1/2/3) — see PROMPT_LENGTH_OPTIONS. */
+  maxPromptWords: number;
 }
 
 export type GameSettingsUpdate = Partial<GameSettings>;

@@ -71,16 +71,37 @@ export function wordDifficulty(word: string): WordDifficulty {
   return "easy";
 }
 
+/** How many words are in a prompt, e.g. "hula hoop" -> 2, "a suspicious hot dog" -> 4. */
+export function promptWordCount(word: string): number {
+  return word.trim().split(/\s+/).length;
+}
+
 /**
  * `difficulty`, when given, restricts choices to that tier (the host's chosen game
- * mode) — every word offered that turn is the same difficulty. Falls back to the
- * full list if the tier + exclusions leave too few words to fill `count`.
+ * mode) — every word offered that turn is the same difficulty. `maxWords` caps how
+ * long a prompt's phrase can be (1/2/3 words); choices naturally end up a mix of
+ * shorter and longer prompts up to that cap, not all exactly that length.
+ *
+ * Falls back in stages if a combination leaves too few words to fill `count`:
+ * difficulty+length -> difficulty alone -> the full list. Difficulty wins over the
+ * length cap since it's the more deliberate choice (e.g. "Tricky" + "1 word" has no
+ * matches at all — our hard words are never single short words — so that turn just
+ * ignores the length cap rather than ignoring difficulty).
  */
-export function pickRandomWords(count: number, exclude: Set<string> = new Set(), difficulty?: WordDifficulty): string[] {
+export function pickRandomWords(
+  count: number,
+  exclude: Set<string> = new Set(),
+  difficulty?: WordDifficulty,
+  maxWords?: number,
+): string[] {
   let pool = WORD_LIST.filter((w) => !exclude.has(w));
   if (difficulty) {
     const tier = pool.filter((w) => wordDifficulty(w) === difficulty);
     if (tier.length >= count) pool = tier;
+  }
+  if (maxWords) {
+    const short = pool.filter((w) => promptWordCount(w) <= maxWords);
+    if (short.length >= count) pool = short;
   }
   const source = pool.length >= count ? pool : WORD_LIST;
   const picked: string[] = [];

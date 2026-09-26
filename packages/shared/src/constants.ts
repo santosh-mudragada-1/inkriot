@@ -2,8 +2,8 @@ export const MAX_PLAYERS_PER_ROOM = 12;
 export const MIN_PLAYERS_TO_START = 2;
 export const ROOM_CODE_LENGTH = 4;
 
+/** Always exactly this many word cards are offered; only their max length is configurable. */
 export const WORD_CHOICE_COUNT = 3;
-export const WORD_CHOICES_OPTIONS = [1, 2, 3] as const;
 export const WORD_SELECTION_SECONDS = 12;
 export const ROUND_REVEAL_SECONDS = 4;
 export const SCOREBOARD_SECONDS = 6;
@@ -27,6 +27,14 @@ export const GAME_MODE_OPTIONS = [
   { value: "hard", label: "Tricky" },
 ] as const;
 export const DEFAULT_GAME_MODE = "medium";
+
+/**
+ * How long a prompt's phrase can be, in words. Choices offered each turn are a mix
+ * of prompts at or under this cap, not all exactly this length — e.g. picking "2"
+ * might still offer a one-word prompt alongside a two-word one.
+ */
+export const PROMPT_LENGTH_OPTIONS = [1, 2, 3] as const;
+export const DEFAULT_PROMPT_LENGTH = 3;
 
 export const MAX_POINTS = 1000;
 export const MIN_POINTS = 100;
