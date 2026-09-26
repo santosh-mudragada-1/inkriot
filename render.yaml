@@ -1,7 +1,7 @@
 services:
   - type: web
     name: inkriot-server
-    runtime: node
+    env: node
     plan: free
     region: oregon
     buildCommand: npm install && npm run build:shared && npm run build --workspace=@inkriot/server
