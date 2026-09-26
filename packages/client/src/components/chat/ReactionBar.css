@@ -1,0 +1,22 @@
+.reaction-bar {
+  display: flex;
+  gap: 4px;
+  padding: var(--space-2) var(--space-3);
+  overflow-x: auto;
+  border-top: 2px solid var(--color-line);
+}
+
+.reaction-btn {
+  flex-shrink: 0;
+  font-size: 18px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.reaction-btn:hover {
+  background: var(--color-bg);
+}

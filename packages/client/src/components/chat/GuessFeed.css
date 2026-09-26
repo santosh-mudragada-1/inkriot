@@ -1,0 +1,39 @@
+.guess-feed {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space-3);
+  min-height: 0;
+}
+
+.guess-line {
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  word-break: break-word;
+}
+
+.guess-line.is-correct {
+  background: rgba(216, 255, 62, 0.6);
+  font-weight: 700;
+}
+
+.guess-line.is-close {
+  background: rgba(255, 77, 26, 0.08);
+}
+
+.guess-line.is-system {
+  text-align: center;
+  color: var(--color-ink-faint);
+  font-size: 12px;
+  font-style: italic;
+}
+
+.close-hint {
+  color: var(--color-accent);
+  font-style: normal;
+  font-weight: 700;
+}

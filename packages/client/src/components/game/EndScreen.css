@@ -1,0 +1,120 @@
+.end-screen {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-6) var(--space-4) var(--space-7);
+  gap: var(--space-2);
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.end-trophy {
+  font-size: 64px;
+}
+
+.end-kicker {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-faint);
+}
+
+.end-champion {
+  font-size: clamp(36px, 7vw, 64px);
+  color: var(--color-accent);
+}
+
+.end-champion-score {
+  font-weight: 700;
+  color: var(--color-ink-soft);
+  margin-bottom: var(--space-5);
+}
+
+.end-runners {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: var(--space-5);
+}
+
+.end-runner {
+  display: grid;
+  grid-template-columns: 24px 32px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-bg-raised);
+  border: 1.5px solid var(--color-line-strong);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  text-align: left;
+}
+
+.end-runner-rank {
+  font-weight: 800;
+  color: var(--color-ink-faint);
+}
+
+.end-runner-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.end-runner-score {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.end-awards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-3);
+  width: 100%;
+  margin-bottom: var(--space-6);
+}
+
+.end-award-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--color-secondary);
+  border: 2px solid var(--color-ink);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  text-align: left;
+}
+
+.award-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.award-detail {
+  font-size: 12px;
+  color: var(--color-ink-soft);
+}
+
+.end-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: center;
+}
+
+.end-waiting {
+  font-weight: 700;
+  color: var(--color-ink-soft);
+}

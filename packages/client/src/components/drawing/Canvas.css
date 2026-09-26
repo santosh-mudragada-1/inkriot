@@ -1,0 +1,48 @@
+.canvas-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  border: 2px solid var(--color-ink);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-pop);
+  touch-action: none;
+}
+
+.draw-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: none;
+}
+
+.draw-canvas:not(.is-live) {
+  cursor: default;
+}
+
+.canvas-tool-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  border: 2px solid var(--color-ink);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 100ms ease, width 100ms var(--ease-spring), height 100ms var(--ease-spring);
+  mix-blend-mode: normal;
+}
+
+.canvas-tool-cursor.visible {
+  opacity: 0.9;
+}
+
+.canvas-tool-cursor.tool-pencil {
+  border-width: 1px;
+}
+
+@media (hover: none) {
+  .canvas-tool-cursor {
+    display: none;
+  }
+}

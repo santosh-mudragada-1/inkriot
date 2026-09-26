@@ -1,0 +1,26 @@
+.sound-toggle {
+  position: fixed;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 500;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid var(--color-ink);
+  background: var(--color-bg-raised);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+}
+
+@media (max-width: 640px) {
+  .sound-toggle {
+    top: var(--space-3);
+    right: var(--space-3);
+    width: 38px;
+    height: 38px;
+  }
+}

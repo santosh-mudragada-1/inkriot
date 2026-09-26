@@ -1,0 +1,146 @@
+.toolbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  background: var(--color-paper);
+  border: 2.5px solid var(--color-ink);
+  border-radius: var(--radius-pill);
+  padding: 10px 20px;
+  box-shadow: 5px 5px 0 var(--color-ink);
+  overflow: hidden;
+}
+
+/* faint confetti-dot pattern, kept subtle so it never competes with the controls */
+.toolbar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    radial-gradient(circle, var(--color-accent) 1.6px, transparent 1.6px),
+    radial-gradient(circle, var(--color-sky) 1.6px, transparent 1.6px),
+    radial-gradient(circle, var(--color-yellow) 1.6px, transparent 1.6px),
+    radial-gradient(circle, var(--color-pink) 1.6px, transparent 1.6px);
+  background-size: 46px 46px;
+  background-position:
+    0 0,
+    23px 12px,
+    12px 30px,
+    34px 34px;
+}
+
+.toolbar-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-divider {
+  position: relative;
+  width: 2px;
+  align-self: stretch;
+  margin: 2px 0;
+  background: repeating-linear-gradient(180deg, var(--color-line-strong) 0 5px, transparent 5px 10px);
+}
+
+.tool-chip {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 56px;
+  height: 52px;
+  border-radius: 18px;
+  border: 2px solid transparent;
+  background: transparent;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.tool-chip-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+}
+
+.tool-chip-label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.tool-chip.active {
+  border-color: var(--color-ink);
+  background: color-mix(in srgb, var(--tool-accent) 30%, white);
+  box-shadow: 2px 2px 0 var(--color-ink);
+}
+
+.tool-chip.is-action {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+}
+
+.tool-chip.is-action:hover {
+  background: color-mix(in srgb, var(--tool-accent) 25%, white);
+}
+
+.tool-chip.is-danger:hover {
+  color: var(--color-danger);
+}
+
+.swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 60% 40% 55% 45% / 50% 55% 45% 50%;
+  border: 2.2px solid var(--color-ink);
+  cursor: pointer;
+  position: relative;
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.12), inset 2px 2px 0 rgba(255, 255, 255, 0.35);
+}
+
+.swatch.active {
+  box-shadow: 0 0 0 3px var(--color-bg-raised), 0 0 0 5px var(--color-ink);
+  transform: translateY(-2px) rotate(-4deg);
+}
+
+.toolbar-palette {
+  flex-wrap: wrap;
+  max-width: 340px;
+}
+
+@media (max-width: 720px) {
+  .toolbar {
+    gap: var(--space-2);
+    padding: 8px 12px;
+    justify-content: center;
+  }
+  .tool-chip {
+    width: 48px;
+    height: 46px;
+  }
+  .tool-chip-icon {
+    width: 24px;
+    height: 24px;
+  }
+  .tool-chip.is-action {
+    width: 42px;
+    height: 42px;
+  }
+  .swatch {
+    width: 22px;
+    height: 22px;
+  }
+  .toolbar-palette {
+    max-width: 220px;
+  }
+}

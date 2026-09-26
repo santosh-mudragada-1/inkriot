@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: inkriot-server
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build:shared && npm run build --workspace=@inkriot/server
+    startCommand: npm run start --workspace=@inkriot/server
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: CLIENT_ORIGIN
+        sync: false

@@ -1,0 +1,38 @@
+.hint-word {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.hint-gap {
+  width: 10px;
+}
+
+.hint-slot {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 30px;
+}
+
+.hint-blank {
+  position: absolute;
+  bottom: 4px;
+  left: 2px;
+  right: 2px;
+  height: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--color-line-strong);
+}
+
+.hint-letter {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 800;
+  color: var(--color-accent);
+  display: inline-block;
+}

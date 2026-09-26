@@ -1,0 +1,15 @@
+{
+  "name": "inkriot",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@inkriot/server & npm run dev --workspace=@inkriot/client",
+    "dev:server": "npm run dev --workspace=@inkriot/server",
+    "dev:client": "npm run dev --workspace=@inkriot/client",
+    "build": "npm run build --workspace=@inkriot/shared && npm run build --workspace=@inkriot/server && npm run build --workspace=@inkriot/client",
+    "build:shared": "npm run build --workspace=@inkriot/shared"
+  }
+}

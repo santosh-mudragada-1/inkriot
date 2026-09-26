@@ -1,0 +1,7 @@
+{
+  "buildCommand": "npm run build:shared && npm run build --workspace=@inkriot/client",
+  "installCommand": "npm install",
+  "outputDirectory": "packages/client/dist",
+  "framework": null,
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

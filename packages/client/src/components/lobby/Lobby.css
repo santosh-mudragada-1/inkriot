@@ -1,0 +1,100 @@
+.lobby {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-5) var(--space-6);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.lobby-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.lobby-title {
+  font-size: clamp(28px, 4vw, 44px);
+}
+
+.lobby-subtitle {
+  color: var(--color-ink-soft);
+  margin-top: 4px;
+}
+
+.lobby-room-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.room-code-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 2px solid var(--color-ink);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-secondary);
+}
+.room-code-badge span {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.room-code-badge strong {
+  font-family: var(--font-display);
+  font-size: 24px;
+  letter-spacing: 0.1em;
+}
+
+.lobby-players {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-content: flex-start;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.lobby-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  border-top: 2px dashed var(--color-line-strong);
+  padding-top: var(--space-4);
+  text-align: center;
+}
+
+.lobby-count {
+  font-weight: 700;
+  color: var(--color-ink-soft);
+  text-align: center;
+  margin: 0;
+}
+
+.lobby-settings-preview {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-ink-faint);
+}
+
+.lobby-waiting {
+  font-weight: 700;
+  color: var(--color-ink-soft);
+}
+
+@media (max-width: 640px) {
+  .lobby {
+    padding: var(--space-4);
+  }
+}

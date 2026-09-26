@@ -1,0 +1,21 @@
+.draw-countdown {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.draw-countdown-step {
+  font-family: var(--font-display);
+  font-size: clamp(64px, 12vw, 140px);
+  font-weight: 800;
+  color: var(--color-ink);
+  text-shadow: 0 4px 0 var(--color-bg-raised);
+}
+
+.draw-countdown-step.is-go {
+  color: var(--color-accent);
+}

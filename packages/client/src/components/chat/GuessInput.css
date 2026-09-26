@@ -1,0 +1,24 @@
+.guess-input-row {
+  padding: var(--space-3);
+  border-top: 2px solid var(--color-line);
+}
+
+.guess-input {
+  width: 100%;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 14px;
+  border: 2px solid var(--color-line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-bg);
+  outline: none;
+}
+
+.guess-input:focus {
+  border-color: var(--color-ink);
+}
+
+.guess-input:disabled {
+  opacity: 0.5;
+}

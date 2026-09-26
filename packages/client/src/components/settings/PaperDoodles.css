@@ -1,0 +1,17 @@
+.paper-doodles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 0;
+}
+
+.paper-doodle {
+  position: absolute;
+}
+
+@media (max-width: 640px) {
+  .paper-doodle {
+    transform: scale(0.7);
+  }
+}
