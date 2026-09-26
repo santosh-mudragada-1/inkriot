@@ -3,6 +3,7 @@ export const MIN_PLAYERS_TO_START = 2;
 export const ROOM_CODE_LENGTH = 4;
 
 export const WORD_CHOICE_COUNT = 3;
+export const WORD_CHOICES_OPTIONS = [1, 2, 3] as const;
 export const WORD_SELECTION_SECONDS = 12;
 export const ROUND_REVEAL_SECONDS = 4;
 export const SCOREBOARD_SECONDS = 6;
@@ -19,9 +20,13 @@ export const PLAYERS_OPTIONS: number[] = Array.from(
 );
 export const DRAW_SECONDS_OPTIONS = [30, 45, 60, 80, 100, 120] as const;
 export const ROUNDS_OPTIONS = [1, 2, 3, 4, 5] as const;
+/** The host picks one difficulty tier for the whole game; word choices are drawn from it. */
 export const GAME_MODE_OPTIONS = [
-  { value: "normal", label: "Normal" },
+  { value: "easy", label: "Easy" },
+  { value: "medium", label: "Medium" },
+  { value: "hard", label: "Tricky" },
 ] as const;
+export const DEFAULT_GAME_MODE = "medium";
 
 export const MAX_POINTS = 1000;
 export const MIN_POINTS = 100;

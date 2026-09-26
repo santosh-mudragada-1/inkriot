@@ -4,6 +4,8 @@ import { wordDifficulty } from "@inkriot/shared";
 import { useGameStore } from "../../store/useGameStore";
 import { useCountdown } from "../../hooks/useCountdown";
 import { audio } from "../../lib/audio/AudioManager";
+import { useLeaveRoom } from "../../hooks/useLeaveRoom";
+import { useAvatarFor } from "../../hooks/useAvatarFor";
 import { Logo } from "../common/Logo";
 import { DoodleAvatar } from "../common/DoodleAvatar";
 import { HintWord } from "./HintWord";
@@ -21,6 +23,12 @@ export function RoundHeader() {
   const lastTick = useRef<number | null>(null);
   const artist = room.players.find((p) => p.id === room.artistId);
   const isArtist = selfId === room.artistId;
+  const avatarFor = useAvatarFor();
+  const leaveRoom = useLeaveRoom();
+  const onLogoClick = () => {
+    // A game's in progress here, so a stray click shouldn't silently boot you out.
+    if (window.confirm("Leave this game and go back home?")) leaveRoom();
+  };
 
   useEffect(() => {
     if (!drawing) return;
@@ -42,7 +50,7 @@ export function RoundHeader() {
   return (
     <header className="round-header">
       <div className="rh-left">
-        <Logo size="sm" />
+        <Logo size="sm" onClick={onLogoClick} />
         <div className="rh-round">
           <span className="rh-label hand">round</span>
           <span className="rh-pips" aria-label={`Round ${room.round} of ${room.totalRounds}`}>
@@ -70,7 +78,7 @@ export function RoundHeader() {
           </>
         ) : artist && room.phase === "WORD_SELECTION" ? (
           <span className="rh-choosing">
-            <DoodleAvatar avatar={artist.avatar} seed={artist.id} size={34} crop="bust" />
+            <DoodleAvatar avatar={avatarFor(artist)} seed={artist.id} size={34} crop="bust" />
             <span className="hand">{isArtist ? "your turn — pick a word!" : `${artist.name} is picking a word…`}</span>
           </span>
         ) : null}

@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { Player } from "@inkriot/shared";
 import { useGameStore } from "../../store/useGameStore";
 import { useCountUp } from "../../hooks/useCountUp";
+import { useAvatarFor } from "../../hooks/useAvatarFor";
 import { DoodleAvatar } from "../common/DoodleAvatar";
 import "./Leaderboard.css";
 
@@ -14,6 +15,7 @@ function Score({ value }: { value: number }) {
 
 function Row({ p, rank, isSelf, isArtist }: { p: Player; rank: number; isSelf: boolean; isArtist: boolean }) {
   const scorePopups = useGameStore((s) => s.scorePopups);
+  const avatarFor = useAvatarFor();
   const guessed = p.hasGuessedCorrectly && !isArtist;
   return (
     <motion.div
@@ -23,7 +25,7 @@ function Row({ p, rank, isSelf, isArtist }: { p: Player; rank: number; isSelf: b
     >
       <span className="lb-rank">{p.score > 0 && rank <= 3 ? MEDALS[rank - 1] : rank}</span>
       <span className="avatar-disc lb-avatar" style={{ opacity: p.connected ? 1 : 0.4 }}>
-        <DoodleAvatar avatar={p.avatar} seed={p.id} size={36} crop="bust" />
+        <DoodleAvatar avatar={avatarFor(p)} seed={p.id} size={36} crop="bust" />
       </span>
       <span className="lb-name">
         <span className="lb-name-text">

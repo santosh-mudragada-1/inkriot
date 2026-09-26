@@ -8,7 +8,8 @@ export type GamePhase =
 
 export type DrawTool = "pencil" | "brush" | "marker" | "eraser" | "fill";
 
-export type GameMode = "normal";
+/** Difficulty tier the host picks; word choices offered each turn are drawn from it. */
+export type GameMode = "easy" | "medium" | "hard";
 
 export interface Point {
   x: number; // normalized 0..1
@@ -41,6 +42,8 @@ export interface GameSettings {
   totalRounds: number;
   drawSeconds: number;
   gameMode: GameMode;
+  /** How many word options the artist is offered each turn. */
+  wordChoiceCount: number;
 }
 
 export type GameSettingsUpdate = Partial<GameSettings>;

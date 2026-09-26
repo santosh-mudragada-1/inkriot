@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useGameStore } from "../../store/useGameStore";
 import { PALETTE, useToolStore } from "../../store/useToolStore";
 import { audio } from "../../lib/audio/AudioManager";
+import { useLeaveRoom } from "../../hooks/useLeaveRoom";
 import { Button } from "../common/Button";
 import { Logo } from "../common/Logo";
 import { Canvas, type CanvasHandle } from "../drawing/Canvas";
@@ -17,6 +18,7 @@ const WALL_SIZES = [6, 16];
 export default function Lobby() {
   const room = useGameStore((s) => s.room)!;
   const selfId = useGameStore((s) => s.selfId);
+  const leaveRoom = useLeaveRoom();
   const [copied, setCopied] = useState(false);
   const wallRef = useRef<CanvasHandle>(null);
   const { color, size, setColor, setSize } = useToolStore();
@@ -47,7 +49,7 @@ export default function Lobby() {
   return (
     <div className="lobby">
       <header className="lobby-header">
-        <Logo size="sm" />
+        <Logo size="sm" onClick={leaveRoom} />
         <div className="lobby-room-info">
           <motion.div
             className="room-code-badge"

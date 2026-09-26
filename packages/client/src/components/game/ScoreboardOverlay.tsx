@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useGameStore } from "../../store/useGameStore";
 import { useCountdown } from "../../hooks/useCountdown";
 import { useCountUp } from "../../hooks/useCountUp";
+import { useAvatarFor } from "../../hooks/useAvatarFor";
 import { DoodleAvatar } from "../common/DoodleAvatar";
 import "./ScoreboardOverlay.css";
 
@@ -17,6 +18,7 @@ export function ScoreboardOverlay() {
   const sorted = [...room.players].sort((a, b) => b.score - a.score);
   const maxScore = Math.max(1, sorted[0]?.score ?? 1);
   const remainingMs = useCountdown(room.phaseEndsAt);
+  const avatarFor = useAvatarFor();
 
   return (
     <motion.div className="overlay-scrim" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -39,7 +41,7 @@ export function ScoreboardOverlay() {
             >
               <span className="sb-rank">{i + 1}</span>
               <span className="avatar-disc sb-avatar">
-                <DoodleAvatar avatar={p.avatar} seed={p.id} size={34} crop="bust" />
+                <DoodleAvatar avatar={avatarFor(p)} seed={p.id} size={34} crop="bust" />
               </span>
               <span className="sb-name">{p.name}</span>
               <div className="sb-bar-track">

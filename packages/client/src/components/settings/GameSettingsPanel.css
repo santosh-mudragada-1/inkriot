@@ -36,6 +36,11 @@
 }
 
 .settings-card {
+  /* No `isolation: isolate` here on purpose: that would trap the PlayfulSelect
+     dropdowns (which raise their own z-index while open) inside this card's own
+     stacking context, so they could never paint above the Start button below it.
+     The -1/-2 pseudo-element layers below stay behind regardless, since this card
+     has no z-index of its own and so never forms a competing stacking context. */
   position: relative;
   width: 100%;
   display: flex;
@@ -46,7 +51,6 @@
   border: var(--stroke) solid var(--color-ink);
   border-radius: 26px;
   box-shadow: 6px 6px 0 var(--color-ink);
-  isolation: isolate;
 }
 
 /* stacked cut-paper layer behind the card */

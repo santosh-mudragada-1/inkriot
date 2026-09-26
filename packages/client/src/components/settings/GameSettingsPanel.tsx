@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
-import { DRAW_SECONDS_OPTIONS, PLAYERS_OPTIONS, ROUNDS_OPTIONS, type GameMode } from "@inkriot/shared";
+import { DRAW_SECONDS_OPTIONS, GAME_MODE_OPTIONS, PLAYERS_OPTIONS, ROUNDS_OPTIONS, WORD_CHOICES_OPTIONS } from "@inkriot/shared";
 import { useGameStore } from "../../store/useGameStore";
 import { socket } from "../../lib/socket";
 import { Button } from "../common/Button";
-import { IconGameMode, IconPlayers, IconRounds, IconStopwatch } from "../icons/DoodleIcons";
+import { IconGameMode, IconPlayers, IconRounds, IconStopwatch, IconWordChoices } from "../icons/DoodleIcons";
 import { PlayfulSelect } from "./PlayfulSelect";
 import { PaperDoodles } from "./PaperDoodles";
 import "./GameSettingsPanel.css";
@@ -11,9 +11,8 @@ import "./GameSettingsPanel.css";
 const PLAYERS_SELECT_OPTIONS = PLAYERS_OPTIONS.map((n) => ({ value: n, label: String(n) }));
 const DRAW_SECONDS_SELECT_OPTIONS = DRAW_SECONDS_OPTIONS.map((n) => ({ value: n, label: `${n}s` }));
 const ROUNDS_SELECT_OPTIONS = ROUNDS_OPTIONS.map((n) => ({ value: n, label: String(n) }));
-const GAME_MODE_SELECT_OPTIONS: { value: GameMode; label: string; disabled?: boolean; badge?: string }[] = [
-  { value: "normal", label: "Normal" },
-];
+const GAME_MODE_SELECT_OPTIONS = GAME_MODE_OPTIONS.map((o) => ({ value: o.value, label: o.label }));
+const WORD_CHOICES_SELECT_OPTIONS = WORD_CHOICES_OPTIONS.map((n) => ({ value: n, label: String(n) }));
 
 export function GameSettingsPanel() {
   const room = useGameStore((s) => s.room)!;
@@ -65,10 +64,19 @@ export function GameSettingsPanel() {
           <PlayfulSelect
             icon={<IconGameMode />}
             accent="var(--color-pink)"
-            label="Game mode"
+            label="Difficulty"
             value={settings.gameMode}
             options={GAME_MODE_SELECT_OPTIONS}
             onChange={(v) => update({ gameMode: v })}
+          />
+          <div className="settings-divider" />
+          <PlayfulSelect
+            icon={<IconWordChoices />}
+            accent="var(--color-mint)"
+            label="Word choices"
+            value={settings.wordChoiceCount}
+            options={WORD_CHOICES_SELECT_OPTIONS}
+            onChange={(v) => update({ wordChoiceCount: v })}
           />
         </div>
 

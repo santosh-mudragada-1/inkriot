@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
 import type { Player } from "@inkriot/shared";
+import { useAvatarFor } from "../../hooks/useAvatarFor";
 import { DoodleAvatar } from "../common/DoodleAvatar";
 import "./PlayerCard.css";
 
 export function PlayerCard({ player, isSelf, rotate }: { player: Player; isSelf: boolean; rotate: number }) {
+  const avatarFor = useAvatarFor();
   return (
     <motion.div
       layout
@@ -17,7 +19,7 @@ export function PlayerCard({ player, isSelf, rotate }: { player: Player; isSelf:
     >
       <div className="player-avatar-wrap">
         <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 2.2 + (rotate % 1), repeat: Infinity, ease: "easeInOut" }}>
-          <DoodleAvatar avatar={player.avatar} seed={player.id} size={84} />
+          <DoodleAvatar avatar={avatarFor(player)} seed={player.id} size={84} />
         </motion.div>
       </div>
       <span className="player-name">{player.name}</span>

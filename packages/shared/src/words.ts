@@ -71,19 +71,19 @@ export function wordDifficulty(word: string): WordDifficulty {
   return "easy";
 }
 
-export function pickRandomWords(count: number, exclude: Set<string> = new Set()): string[] {
-  const pool = WORD_LIST.filter((w) => !exclude.has(w));
-  const source = pool.length >= count ? pool : WORD_LIST;
-  const byDifficulty: Record<WordDifficulty, string[]> = { easy: [], medium: [], hard: [] };
-  for (const w of source) byDifficulty[wordDifficulty(w)].push(w);
-
-  // Offer one of each difficulty when possible so the artist gets a real choice.
-  const picked: string[] = [];
-  for (const d of ["easy", "medium", "hard"] as const) {
-    if (picked.length >= count) break;
-    const bucket = byDifficulty[d];
-    if (bucket.length) picked.push(bucket[Math.floor(Math.random() * bucket.length)]);
+/**
+ * `difficulty`, when given, restricts choices to that tier (the host's chosen game
+ * mode) — every word offered that turn is the same difficulty. Falls back to the
+ * full list if the tier + exclusions leave too few words to fill `count`.
+ */
+export function pickRandomWords(count: number, exclude: Set<string> = new Set(), difficulty?: WordDifficulty): string[] {
+  let pool = WORD_LIST.filter((w) => !exclude.has(w));
+  if (difficulty) {
+    const tier = pool.filter((w) => wordDifficulty(w) === difficulty);
+    if (tier.length >= count) pool = tier;
   }
+  const source = pool.length >= count ? pool : WORD_LIST;
+  const picked: string[] = [];
   while (picked.length < count && picked.length < source.length) {
     const w = source[Math.floor(Math.random() * source.length)];
     if (!picked.includes(w)) picked.push(w);

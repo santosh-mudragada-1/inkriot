@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { WORD_SELECTION_SECONDS, wordDifficulty } from "@inkriot/shared";
+import { WORD_SELECTION_SECONDS } from "@inkriot/shared";
 import { useGameStore } from "../../store/useGameStore";
 import { socket } from "../../lib/socket";
 import { audio } from "../../lib/audio/AudioManager";
@@ -7,7 +7,7 @@ import { useCountdown } from "../../hooks/useCountdown";
 import { DoodleAvatar } from "../common/DoodleAvatar";
 import "./WordSelectOverlay.css";
 
-const DIFF_LABEL = { easy: "easy", medium: "medium", hard: "tricky" } as const;
+const PICK_HINT = { easy: "Pick one to draw", medium: "Pick one to draw", hard: "Pick one — brace yourself" } as const;
 
 export function WordSelectOverlay() {
   const room = useGameStore((s) => s.room)!;
@@ -16,38 +16,35 @@ export function WordSelectOverlay() {
   const remainingMs = useCountdown(room.phaseEndsAt);
   const artist = room.players.find((p) => p.id === room.artistId);
   const secs = Math.ceil(remainingMs / 1000);
+  const mode = room.settings.gameMode;
 
   return (
     <motion.div className="overlay-scrim" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
       {isArtist ? (
         <div className="word-select">
           <motion.p className="word-select-hint" initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-            Your turn to draw! Pick one
+            {PICK_HINT[mode]}
           </motion.p>
           <div className="word-cards">
-            {(room.wordChoices ?? []).map((word, i) => {
-              const diff = wordDifficulty(word);
-              return (
-                <motion.button
-                  key={word}
-                  className={`word-card diff-${diff}`}
-                  initial={{ opacity: 0, y: 60, rotateY: 90, rotate: (i - 1) * 8 }}
-                  animate={{ opacity: 1, y: 0, rotateY: 0, rotate: (i - 1) * 4 }}
-                  transition={{ delay: 0.1 + i * 0.12, type: "spring", stiffness: 300, damping: 20 }}
-                  whileHover={{ y: -12, rotate: 0, scale: 1.06 }}
-                  whileTap={{ scale: 0.94 }}
-                  onHoverStart={() => audio.playHover()}
-                  onClick={() => {
-                    audio.playWordSelect();
-                    socket.emit("select_word", word);
-                  }}
-                >
-                  <span className="word-card-diff">{DIFF_LABEL[diff]}</span>
-                  <span className="word-card-word">{word}</span>
-                  <span className="word-card-meta">{word.replace(/[^a-z]/gi, "").length} letters</span>
-                </motion.button>
-              );
-            })}
+            {(room.wordChoices ?? []).map((word, i) => (
+              <motion.button
+                key={word}
+                className={`word-card diff-${mode}`}
+                initial={{ opacity: 0, y: 60, rotateY: 90, rotate: (i - 1) * 8 }}
+                animate={{ opacity: 1, y: 0, rotateY: 0, rotate: (i - 1) * 4 }}
+                transition={{ delay: 0.1 + i * 0.12, type: "spring", stiffness: 300, damping: 20 }}
+                whileHover={{ y: -12, rotate: 0, scale: 1.06 }}
+                whileTap={{ scale: 0.94 }}
+                onHoverStart={() => audio.playHover()}
+                onClick={() => {
+                  audio.playWordSelect();
+                  socket.emit("select_word", word);
+                }}
+              >
+                <span className="word-card-word">{word}</span>
+                <span className="word-card-meta">{word.replace(/[^a-z]/gi, "").length} letters</span>
+              </motion.button>
+            ))}
           </div>
           <p className={`word-select-timer hand ${secs <= 4 ? "urgent" : ""}`}>
             auto-picks in {secs}s

@@ -5,6 +5,7 @@ import {
   AVATAR_PATTERN,
   ClientToServerEvents,
   DEFAULT_DRAW_SECONDS,
+  DEFAULT_GAME_MODE,
   DEFAULT_MAX_PLAYERS,
   DEFAULT_ROUNDS,
   DRAW_SECONDS_OPTIONS,
@@ -29,6 +30,7 @@ import {
   SCOREBOARD_SECONDS,
   ServerToClientEvents,
   WORD_CHOICE_COUNT,
+  WORD_CHOICES_OPTIONS,
   WORD_SELECTION_SECONDS,
   artistPoints,
   buildHintPattern,
@@ -65,7 +67,8 @@ export class Room {
   totalRounds = DEFAULT_ROUNDS;
   drawSeconds = DEFAULT_DRAW_SECONDS;
   maxPlayers = DEFAULT_MAX_PLAYERS;
-  gameMode: GameMode = "normal";
+  gameMode: GameMode = DEFAULT_GAME_MODE;
+  wordChoiceCount = WORD_CHOICE_COUNT;
   artistOrder: string[] = [];
   turnIndex = -1;
   artistId: string | null = null;
@@ -215,8 +218,11 @@ export class Room {
     if (update.totalRounds !== undefined && (ROUNDS_OPTIONS as readonly number[]).includes(update.totalRounds)) {
       this.totalRounds = update.totalRounds;
     }
-    if (update.gameMode !== undefined && update.gameMode === "normal") {
+    if (update.gameMode !== undefined && (["easy", "medium", "hard"] as GameMode[]).includes(update.gameMode)) {
       this.gameMode = update.gameMode;
+    }
+    if (update.wordChoiceCount !== undefined && (WORD_CHOICES_OPTIONS as readonly number[]).includes(update.wordChoiceCount)) {
+      this.wordChoiceCount = update.wordChoiceCount;
     }
     this.broadcastState();
   }
@@ -266,7 +272,7 @@ export class Room {
 
     this.artistId = artist.id;
     this.currentWord = null;
-    this.wordChoices = pickRandomWords(WORD_CHOICE_COUNT, this.usedWords);
+    this.wordChoices = pickRandomWords(this.wordChoiceCount, this.usedWords, this.gameMode);
     this.canvasOps = [];
     this.guesses = [];
     for (const p of this.players.values()) {
@@ -615,6 +621,7 @@ export class Room {
         totalRounds: this.totalRounds,
         drawSeconds: this.drawSeconds,
         gameMode: this.gameMode,
+        wordChoiceCount: this.wordChoiceCount,
       },
       hintPattern: this.phase === "DRAWING" && this.currentWord ? buildHintPattern(this.currentWord, this.hintRevealedIndices) : null,
     };

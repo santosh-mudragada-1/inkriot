@@ -1,11 +1,13 @@
 import { motion } from "framer-motion";
 import { useGameStore } from "../../store/useGameStore";
+import { useAvatarFor } from "../../hooks/useAvatarFor";
 import { DoodleAvatar } from "../common/DoodleAvatar";
 import "./RoundRevealOverlay.css";
 
 export function RoundRevealOverlay() {
   const room = useGameStore((s) => s.room)!;
   const selfId = useGameStore((s) => s.selfId);
+  const avatarFor = useAvatarFor();
   const artist = room.players.find((p) => p.id === room.artistId);
   const guessers = room.players.filter((p) => p.id !== room.artistId);
   const correct = guessers.filter((p) => p.hasGuessedCorrectly).sort((a, b) => (a.lastGuessMs ?? 0) - (b.lastGuessMs ?? 0));
@@ -30,7 +32,7 @@ export function RoundRevealOverlay() {
         </motion.h2>
         {artist && (
           <p className="reveal-artist">
-            <DoodleAvatar avatar={artist.avatar} seed={artist.id} size={30} crop="bust" /> drawn by <b>{artist.id === selfId ? "you" : artist.name}</b>
+            <DoodleAvatar avatar={avatarFor(artist)} seed={artist.id} size={30} crop="bust" /> drawn by <b>{artist.id === selfId ? "you" : artist.name}</b>
           </p>
         )}
         <motion.p className={`reveal-verdict ${everyone ? "is-perfect" : correct.length === 0 ? "is-none" : ""}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
@@ -47,7 +49,7 @@ export function RoundRevealOverlay() {
                 transition={{ delay: 0.5 + i * 0.08, type: "spring", stiffness: 500, damping: 18 }}
               >
                 <span className="reveal-place">{i === 0 ? "1st" : i === 1 ? "2nd" : i === 2 ? "3rd" : `${i + 1}th`}</span>
-                <DoodleAvatar avatar={p.avatar} seed={p.id} size={26} crop="bust" />
+                <DoodleAvatar avatar={avatarFor(p)} seed={p.id} size={26} crop="bust" />
                 {p.name}
                 {p.lastGuessMs !== null && <span className="reveal-time">{(p.lastGuessMs / 1000).toFixed(1)}s</span>}
               </motion.li>

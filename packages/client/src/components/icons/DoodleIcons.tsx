@@ -64,6 +64,18 @@ export function IconGameMode(props: IconProps) {
   );
 }
 
+/** Three fanned word-cards — how many options the artist gets to pick from. */
+export function IconWordChoices(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="8" y="6" width="12" height="17" rx="2.4" transform="rotate(-11 14 14.5)" fill="none" />
+      <rect x="10" y="7.5" width="12" height="17" rx="2.4" fill="var(--color-bg-raised)" />
+      <path d="M13 12.5h6M13 16h6M13 19.5h3.5" strokeWidth="1.8" />
+      <rect x="12" y="9" width="12" height="17" rx="2.4" transform="rotate(9 18 17.5)" fill="none" opacity="0.8" />
+    </svg>
+  );
+}
+
 /** Small chevron used inside the playful dropdown trigger. */
 export function IconWobblyChevron(props: IconProps) {
   return (

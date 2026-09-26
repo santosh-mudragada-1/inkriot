@@ -8,6 +8,7 @@ import { audio } from "../../lib/audio/AudioManager";
 import { confetti } from "../../lib/juice";
 import { levelInfo, useProgress } from "../../lib/progress";
 import { useCountUp } from "../../hooks/useCountUp";
+import { useAvatarFor } from "../../hooks/useAvatarFor";
 import { Button } from "../common/Button";
 import { DoodleAvatar } from "../common/DoodleAvatar";
 import { Logo } from "../common/Logo";
@@ -20,6 +21,7 @@ const PODIUM_HEIGHTS = [150, 110, 80];
 
 function PodiumSpot({ player, place, isSelf }: { player: Player; place: number; isSelf: boolean }) {
   const score = useCountUp(player.score, 1400);
+  const avatarFor = useAvatarFor();
   return (
     <motion.div
       className={`podium-spot place-${place + 1}`}
@@ -33,7 +35,7 @@ function PodiumSpot({ player, place, isSelf }: { player: Player; place: number; 
         transition={{ repeat: Infinity, duration: place === 0 ? 1.2 : 2 }}
       >
         {place === 0 && <span className="podium-crown">👑</span>}
-        <DoodleAvatar avatar={player.avatar} seed={player.id} size={place === 0 ? 120 : 90} />
+        <DoodleAvatar avatar={avatarFor(player)} seed={player.id} size={place === 0 ? 120 : 90} />
       </motion.div>
       <span className="podium-name">
         {player.name}
@@ -98,6 +100,7 @@ export default function EndScreen() {
   const selfId = useGameStore((s) => s.selfId);
   const gallery = useGameStore((s) => s.gallery);
   const navigate = useNavigate();
+  const avatarFor = useAvatarFor();
   const [shared, setShared] = useState(false);
   const isHost = room.hostId === selfId;
   const played = useRef(false);
@@ -171,7 +174,7 @@ export default function EndScreen() {
           {rest.map((p) => (
             <li key={p.id} className={p.id === selfId ? "is-self" : ""}>
               <span className="avatar-disc end-rest-avatar">
-                <DoodleAvatar avatar={p.avatar} seed={p.id} size={32} crop="bust" />
+                <DoodleAvatar avatar={avatarFor(p)} seed={p.id} size={32} crop="bust" />
               </span>
               <span className="end-rest-name">{p.name}</span>
               <b>{p.score}</b>
