@@ -1,31 +1,49 @@
+/*
+ * INKRIOT — "sticker-bombed graph notebook".
+ * Sky-blue grid paper, indigo ink outlines, crayon-bright stickers with hard shadows.
+ */
 :root {
-  --color-bg: #f4f0e8;
-  --color-bg-raised: #ffffff;
-  --color-ink: #11100e;
-  --color-ink-soft: #4a463f;
-  --color-ink-faint: #8a8578;
-  --color-accent: #ff4d1a;
-  --color-accent-ink: #fff3ee;
-  --color-secondary: #d8ff3e;
-  --color-secondary-ink: #11100e;
-  --color-line: rgba(17, 16, 14, 0.12);
-  --color-line-strong: rgba(17, 16, 14, 0.22);
-  --color-danger: #e5304a;
-  --color-success: #1f9d55;
+  /* paper + ink */
+  --color-bg: #cfe6ff; /* graph-paper blue */
+  --color-grid: rgba(27, 19, 64, 0.075);
+  --color-grid-strong: rgba(27, 19, 64, 0.13);
+  --color-bg-raised: #fffdf7; /* sticker paper */
+  --color-paper: #fff8e7;
+  --color-ink: #1b1340; /* indigo ink, never pure black */
+  --color-ink-soft: #4a4270;
+  --color-ink-faint: #8a84ad;
+  --color-line: rgba(27, 19, 64, 0.12);
+  --color-line-strong: rgba(27, 19, 64, 0.24);
 
-  /* party palette — used strategically (settings/celebration moments), not everywhere */
-  --color-paper: #f7f1e7;
-  --color-yellow: #ffd23e;
-  --color-sky: #4fb2ff;
-  --color-pink: #ff6fb0;
-  --color-green: #3ecf6b;
+  /* crayon box */
+  --color-tomato: #ff5a36;
+  --color-sun: #ffc928;
+  --color-gum: #ff7ec7;
+  --color-mint: #2fd4a0;
+  --color-grape: #7b5cff;
+  --color-sky: #3ea8ff;
 
-  --font-display: "Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
-  --font-ui: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* semantic */
+  --color-accent: var(--color-tomato);
+  --color-accent-ink: #fffdf7;
+  --color-secondary: var(--color-sun);
+  --color-secondary-ink: var(--color-ink);
+  --color-danger: #f0364f;
+  --color-success: #17b881;
+  --color-correct-bg: #c9f7e4;
 
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
+  /* legacy aliases used by older components */
+  --color-yellow: var(--color-sun);
+  --color-pink: var(--color-gum);
+  --color-green: var(--color-mint);
+
+  --font-display: "Bagel Fat One", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --font-hand: "Gochi Hand", "Comic Sans MS", cursive;
+  --font-ui: "Nunito", ui-rounded, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 26px;
   --radius-pill: 999px;
 
   --space-1: 4px;
@@ -37,9 +55,11 @@
   --space-7: 48px;
   --space-8: 64px;
 
+  --stroke: 3px;
   --shadow-flat: 0 1px 0 var(--color-line);
-  --shadow-card: 0 2px 0 var(--color-ink);
-  --shadow-pop: 0 6px 0 var(--color-ink);
+  --shadow-card: 3px 3px 0 var(--color-ink);
+  --shadow-pop: 6px 6px 0 var(--color-ink);
+  --shadow-sticker: 0 0 0 5px var(--color-bg-raised), 7px 8px 0 5px rgba(27, 19, 64, 0.22);
 
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -47,18 +67,6 @@
   --dur-base: 220ms;
   --dur-slow: 420ms;
 
+  /* INKRIOT is a single bright theme on purpose — the paper-and-crayon look is the brand. */
   color-scheme: light;
-}
-
-:root[data-theme="dark"],
-:root:not([data-theme="light"]) {
-  /* INKRIOT is intentionally a single warm light theme — a dark variant would
-     dull the ink/accent contrast the brand relies on, so we opt out of auto dark mode. */
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --color-bg: #f4f0e8;
-    --color-ink: #11100e;
-  }
 }

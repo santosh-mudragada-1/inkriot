@@ -15,9 +15,19 @@ body,
 
 body {
   margin: 0;
-  background: var(--color-bg);
+  background-color: var(--color-bg);
+  /* graph-paper grid: fine 24px lines with a stronger line every 4 squares */
+  background-image:
+    linear-gradient(var(--color-grid-strong) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, var(--color-grid-strong) 1.5px, transparent 1.5px),
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
+  background-position: -1px -1px;
+  background-attachment: fixed;
   color: var(--color-ink);
   font-family: var(--font-ui);
+  font-weight: 600;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -30,9 +40,10 @@ h1,
 h2,
 h3 {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 400;
   margin: 0;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.005em;
+  line-height: 1.02;
 }
 
 p {
@@ -48,8 +59,89 @@ a {
 }
 
 ::selection {
-  background: var(--color-secondary);
+  background: var(--color-sun);
   color: var(--color-ink);
+}
+
+:where(:focus-visible) {
+  outline: 3px solid var(--color-grape);
+  outline-offset: 3px;
+}
+
+/* ---- shared sticker vocabulary ---- */
+
+/* A die-cut sticker: paper fill, ink outline, white cut margin, soft drop. */
+.sticker {
+  background: var(--color-bg-raised);
+  border: var(--stroke) solid var(--color-ink);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sticker);
+}
+
+/* A strip of washi tape; place with top/left and rotate inline. */
+.tape {
+  position: absolute;
+  width: 92px;
+  height: 26px;
+  background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.35) 0 6px, transparent 6px 12px), var(--tape, var(--color-gum));
+  opacity: 0.88;
+  border-left: 2px dashed rgba(255, 255, 255, 0.6);
+  border-right: 2px dashed rgba(255, 255, 255, 0.6);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hand {
+  font-family: var(--font-hand);
+  font-weight: 400;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+/* Avatar in a round sticker frame, used in lists */
+.avatar-disc {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2.5px solid var(--color-ink);
+  background: var(--color-bg-raised);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.avatar-disc svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* screen shake (see lib/juice.ts) */
+@keyframes shake-soft {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-3px, 1px) rotate(-0.3deg); }
+  40% { transform: translate(3px, -2px) rotate(0.3deg); }
+  60% { transform: translate(-2px, 2px); }
+  80% { transform: translate(2px, -1px); }
+}
+@keyframes shake-hard {
+  0%, 100% { transform: translate(0, 0); }
+  15% { transform: translate(-8px, 3px) rotate(-0.8deg); }
+  30% { transform: translate(7px, -5px) rotate(0.6deg); }
+  45% { transform: translate(-6px, 4px) rotate(-0.4deg); }
+  60% { transform: translate(5px, -3px); }
+  80% { transform: translate(-2px, 1px); }
+}
+.shake-soft { animation: shake-soft 320ms ease-out; }
+.shake-hard { animation: shake-hard 440ms ease-out; }
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
 }
 
 /* custom scrollbar */
@@ -107,7 +199,8 @@ a {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--color-ink);
+  background: var(--color-tomato);
+  box-shadow: 0 0 0 2px var(--color-bg-raised);
   transition: opacity 120ms ease;
 }
 
@@ -115,19 +208,20 @@ a {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1.5px solid var(--color-ink);
-  opacity: 0.35;
+  border: 2.5px solid var(--color-ink);
+  opacity: 0.4;
   transition: width 160ms var(--ease-spring), height 160ms var(--ease-spring), opacity 160ms ease, border-color 160ms ease;
 }
 
 .cursor-dot.cursor-hover {
-  background: var(--color-accent);
+  background: var(--color-grape);
 }
 .cursor-ring.cursor-hover {
-  width: 46px;
-  height: 46px;
-  border-color: var(--color-accent);
-  opacity: 0.5;
+  width: 50px;
+  height: 50px;
+  border-color: var(--color-grape);
+  border-style: dashed;
+  opacity: 0.7;
 }
 .cursor-dot.cursor-press,
 .cursor-ring.cursor-press {

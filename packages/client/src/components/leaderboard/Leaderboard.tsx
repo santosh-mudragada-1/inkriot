@@ -1,46 +1,73 @@
 import { AnimatePresence, motion } from "framer-motion";
+import type { Player } from "@inkriot/shared";
 import { useGameStore } from "../../store/useGameStore";
+import { useCountUp } from "../../hooks/useCountUp";
+import { DoodleAvatar } from "../common/DoodleAvatar";
 import "./Leaderboard.css";
+
+const MEDALS = ["🥇", "🥈", "🥉"];
+
+function Score({ value }: { value: number }) {
+  const shown = useCountUp(value);
+  return <span className="lb-score">{shown}</span>;
+}
+
+function Row({ p, rank, isSelf, isArtist }: { p: Player; rank: number; isSelf: boolean; isArtist: boolean }) {
+  const scorePopups = useGameStore((s) => s.scorePopups);
+  const guessed = p.hasGuessedCorrectly && !isArtist;
+  return (
+    <motion.div
+      layout
+      className={`lb-row ${isSelf ? "is-self" : ""} ${guessed ? "is-guessed" : ""} ${isArtist ? "is-artist" : ""}`}
+      transition={{ type: "spring", stiffness: 400, damping: 32 }}
+    >
+      <span className="lb-rank">{p.score > 0 && rank <= 3 ? MEDALS[rank - 1] : rank}</span>
+      <span className="avatar-disc lb-avatar" style={{ opacity: p.connected ? 1 : 0.4 }}>
+        <DoodleAvatar avatar={p.avatar} seed={p.id} size={36} crop="bust" />
+      </span>
+      <span className="lb-name">
+        <span className="lb-name-text">
+          {p.name}
+          {isSelf && <em> (you)</em>}
+        </span>
+        <span className="lb-badges">
+          {isArtist && <span className="lb-chip chip-draw">✏️ drawing</span>}
+          {guessed && <span className="lb-chip chip-got">✓ got it</span>}
+          {p.streak >= 2 && <span className="lb-chip chip-fire">🔥×{p.streak}</span>}
+        </span>
+      </span>
+      <Score value={p.score} />
+      <AnimatePresence>
+        {scorePopups
+          .filter((s) => s.playerId === p.id)
+          .map((s) => (
+            <motion.span
+              key={s.id}
+              className="lb-popup"
+              initial={{ opacity: 0, y: 6, scale: 0.5 }}
+              animate={{ opacity: 1, y: -30, scale: 1.1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
+            >
+              +{s.amount}
+            </motion.span>
+          ))}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
 
 export function Leaderboard() {
   const room = useGameStore((s) => s.room)!;
   const selfId = useGameStore((s) => s.selfId);
-  const scorePopups = useGameStore((s) => s.scorePopups);
   const sorted = [...room.players].sort((a, b) => b.score - a.score);
 
   return (
     <div className="leaderboard">
-      <h3 className="leaderboard-title">Leaderboard</h3>
+      <h3 className="leaderboard-title">Scoreboard</h3>
       <div className="leaderboard-list">
         {sorted.map((p, i) => (
-          <motion.div key={p.id} layout className={`lb-row ${p.id === selfId ? "is-self" : ""}`} transition={{ type: "spring", stiffness: 400, damping: 32 }}>
-            <span className="lb-rank">{i + 1}</span>
-            <span className="lb-avatar" style={{ background: p.color, opacity: p.connected ? 1 : 0.4 }}>
-              {p.name.charAt(0).toUpperCase()}
-            </span>
-            <span className="lb-name">
-              {p.name}
-              {p.id === room.artistId && <span title="Drawing"> ✏️</span>}
-              {p.streak >= 2 && <span title="On a streak"> 🔥{p.streak}</span>}
-            </span>
-            <span className="lb-score">{p.score}</span>
-            <AnimatePresence>
-              {scorePopups
-                .filter((s) => s.playerId === p.id)
-                .map((s) => (
-                  <motion.span
-                    key={s.id}
-                    className="lb-popup"
-                    initial={{ opacity: 0, y: 0 }}
-                    animate={{ opacity: 1, y: -34 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 1.2, ease: "easeOut" }}
-                  >
-                    +{s.amount}
-                  </motion.span>
-                ))}
-            </AnimatePresence>
-          </motion.div>
+          <Row key={p.id} p={p} rank={i + 1} isSelf={p.id === selfId} isArtist={p.id === room.artistId} />
         ))}
       </div>
     </div>

@@ -2,9 +2,9 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: var(--space-3) var(--space-4) var(--space-4);
-  gap: var(--space-3);
-  max-width: 1440px;
+  padding: var(--space-2) var(--space-4) var(--space-4);
+  gap: var(--space-2);
+  max-width: 1480px;
   margin: 0 auto;
   width: 100%;
 }
@@ -13,28 +13,43 @@
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: 220px 1fr 280px;
-  gap: var(--space-4);
+  grid-template-columns: 230px minmax(0, 1fr) 300px;
+  gap: var(--space-5);
 }
 
 .game-panel {
-  background: var(--color-bg);
-  border-radius: var(--radius-md);
   min-height: 0;
   display: flex;
   flex-direction: column;
 }
 
 .panel-right {
-  border: 2px solid var(--color-ink);
+  border: var(--stroke) solid var(--color-ink);
   background: var(--color-bg-raised);
+  border-radius: var(--radius-lg);
+  box-shadow: 5px 5px 0 var(--color-ink);
   overflow: hidden;
+}
+
+.chat-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4) var(--space-2);
+  border-bottom: var(--stroke) solid var(--color-ink);
+  background: var(--color-gum);
+}
+.chat-head h3 {
+  font-size: 20px;
+}
+.chat-head .hand {
+  font-size: 18px;
 }
 
 .game-center {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-4);
   min-height: 0;
   min-width: 0;
 }
@@ -51,27 +66,37 @@
   justify-content: center;
 }
 
-.mobile-tabs {
-  display: none;
-}
-
+.mobile-guess,
+.mobile-tabs,
 .mobile-sheet {
   display: none;
 }
 
 @media (max-width: 900px) {
   .game-screen {
-    padding: var(--space-2) var(--space-2) 64px;
+    padding: var(--space-1) var(--space-2) 64px;
+    height: 100dvh;
   }
   .game-body {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
   }
   .panel-left,
   .panel-right {
     display: none;
   }
   .canvas-wrap {
-    min-height: 360px;
+    min-height: 260px;
+  }
+  .canvas-frame {
+    box-shadow: 4px 4px 0 var(--color-ink);
+  }
+  .mobile-guess {
+    display: block;
+  }
+  .mobile-guess .guess-input-row {
+    padding: 0;
+    border: none;
   }
 
   .mobile-tabs {
@@ -82,35 +107,55 @@
     right: 0;
     z-index: 60;
     background: var(--color-bg-raised);
-    border-top: 2px solid var(--color-ink);
+    border-top: var(--stroke) solid var(--color-ink);
+    padding-bottom: env(safe-area-inset-bottom);
   }
   .mobile-tabs button {
+    position: relative;
     flex: 1;
-    padding: 12px;
-    font-weight: 700;
+    padding: 14px;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--color-ink);
     background: none;
     border: none;
-    border-right: 1px solid var(--color-line);
+  }
+  .mobile-tabs button + button {
+    border-left: 2px dashed var(--color-line-strong);
   }
   .mobile-tabs button.active {
-    background: var(--color-secondary);
+    background: var(--color-sun);
+  }
+  .mobile-badge {
+    position: absolute;
+    top: 6px;
+    margin-left: 6px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    border-radius: var(--radius-pill);
+    background: var(--color-tomato);
+    color: #fff;
+    font-size: 11px;
+    line-height: 20px;
   }
 
   .mobile-sheet {
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(17, 16, 14, 0.35);
+    background: rgba(27, 19, 64, 0.35);
     z-index: 70;
   }
   .mobile-sheet-content {
     position: absolute;
-    bottom: 56px;
+    bottom: 52px;
     left: 0;
     right: 0;
-    max-height: 60vh;
+    max-height: 62vh;
     background: var(--color-bg-raised);
-    border-top: 2px solid var(--color-ink);
+    border-top: var(--stroke) solid var(--color-ink);
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     padding: var(--space-3);
     display: flex;

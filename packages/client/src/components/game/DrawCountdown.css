@@ -10,12 +10,14 @@
 
 .draw-countdown-step {
   font-family: var(--font-display);
-  font-size: clamp(64px, 12vw, 140px);
-  font-weight: 800;
-  color: var(--color-ink);
-  text-shadow: 0 4px 0 var(--color-bg-raised);
+  font-size: clamp(90px, 16vw, 200px);
+  color: var(--color-sun);
+  -webkit-text-stroke: 6px var(--color-ink);
+  paint-order: stroke fill;
+  text-shadow: 8px 10px 0 var(--color-ink);
 }
 
 .draw-countdown-step.is-go {
-  color: var(--color-accent);
+  color: var(--color-tomato);
+  font-size: clamp(70px, 12vw, 150px);
 }

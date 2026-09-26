@@ -2,12 +2,12 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: 6px;
+  gap: 5px;
   flex-wrap: wrap;
 }
 
 .hint-gap {
-  width: 10px;
+  width: 14px;
 }
 
 .hint-slot {
@@ -15,24 +15,33 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 30px;
+  width: 24px;
+  height: 34px;
 }
 
 .hint-blank {
   position: absolute;
-  bottom: 4px;
+  bottom: 3px;
   left: 2px;
   right: 2px;
-  height: 3px;
+  height: 4px;
   border-radius: var(--radius-pill);
-  background: var(--color-line-strong);
+  background: var(--color-ink);
 }
 
 .hint-letter {
   font-family: var(--font-display);
-  font-size: clamp(20px, 3vw, 28px);
-  font-weight: 800;
-  color: var(--color-accent);
+  font-size: clamp(22px, 3vw, 30px);
+  color: var(--color-grape);
   display: inline-block;
+}
+
+@media (max-width: 640px) {
+  .hint-slot {
+    width: 17px;
+    height: 28px;
+  }
+  .hint-gap {
+    width: 8px;
+  }
 }

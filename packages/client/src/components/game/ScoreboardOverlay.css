@@ -3,79 +3,93 @@
   flex-direction: column;
   gap: var(--space-4);
   background: var(--color-bg-raised);
-  border: 2px solid var(--color-ink);
+  border: var(--stroke) solid var(--color-ink);
   border-radius: var(--radius-lg);
-  padding: var(--space-6);
+  padding: var(--space-5) var(--space-5);
   box-shadow: var(--shadow-pop);
-  width: min(480px, 92vw);
+  width: min(520px, 100%);
 }
 
 .scoreboard-title {
   text-align: center;
-  font-size: 22px;
+  font-size: 32px;
 }
 
 .scoreboard-rows {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 320px;
+  max-height: 340px;
   overflow-y: auto;
+  padding: 2px;
 }
 
 .sb-row {
   display: grid;
-  grid-template-columns: 20px 28px 90px 1fr 48px;
+  grid-template-columns: 22px 38px minmax(60px, 110px) 1fr 56px;
   align-items: center;
   gap: 10px;
+  padding: 4px 8px;
+  border-radius: var(--radius-md);
+}
+.sb-row.is-self {
+  background: var(--color-paper);
+  outline: 2.5px dashed var(--color-grape);
 }
 
 .sb-rank {
-  font-weight: 800;
-  color: var(--color-ink-faint);
-  font-size: 13px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  text-align: center;
 }
 
 .sb-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1.5px solid var(--color-ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 800;
+  width: 38px;
+  height: 38px;
 }
 
 .sb-name {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 900;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .sb-bar-track {
-  height: 8px;
+  height: 18px;
   border-radius: var(--radius-pill);
-  background: var(--color-line);
+  background: var(--color-paper);
+  border: 2.5px solid var(--color-ink);
   overflow: hidden;
 }
 .sb-bar-fill {
   height: 100%;
-  background: var(--color-accent);
+  border-right: 2.5px solid var(--color-ink);
+  border-radius: var(--radius-pill);
 }
 
 .sb-score {
-  font-family: var(--font-display);
-  font-weight: 700;
+  font-family: var(--font-ui);
+  font-weight: 900;
+  font-size: 18px;
   text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .scoreboard-next {
   text-align: center;
-  color: var(--color-ink-faint);
-  font-size: 13px;
-  font-weight: 700;
+  color: var(--color-ink-soft);
+  font-size: 20px;
+}
+
+@media (max-width: 520px) {
+  .sb-row {
+    grid-template-columns: 18px 32px minmax(50px, 80px) 1fr 46px;
+    gap: 6px;
+  }
+  .sb-avatar {
+    width: 32px;
+    height: 32px;
+  }
 }

@@ -1,0 +1,29 @@
+.logo {
+  display: inline-flex;
+  gap: 3px;
+  user-select: none;
+}
+
+.logo-letter {
+  display: inline-grid;
+  place-items: center;
+  font-family: var(--font-display);
+  color: var(--color-ink);
+  border: 2.5px solid var(--color-ink);
+  border-radius: 9px;
+  box-shadow: 2px 3px 0 var(--color-ink);
+}
+
+.logo-md .logo-letter {
+  width: 36px;
+  height: 40px;
+  font-size: 24px;
+}
+.logo-sm .logo-letter {
+  width: 24px;
+  height: 27px;
+  font-size: 16px;
+  border-width: 2px;
+  border-radius: 6px;
+  box-shadow: 1.5px 2px 0 var(--color-ink);
+}

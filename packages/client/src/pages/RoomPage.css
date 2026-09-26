@@ -3,35 +3,48 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-5);
+  padding: var(--space-7) var(--space-4) var(--space-5);
+}
+
+.room-gate-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 24px;
 }
 
 .room-gate-spinner {
-  width: 36px;
-  height: 36px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  border: 3px solid var(--color-line-strong);
-  border-top-color: var(--color-accent);
+  border: 5px dashed var(--color-ink);
+  border-top-color: var(--color-tomato);
+  border-right-color: var(--color-sun);
 }
 
 .room-gate-form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  background: var(--color-bg-raised);
-  border: 2px solid var(--color-ink);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-  box-shadow: var(--shadow-pop);
+  align-items: stretch;
+  gap: var(--space-4);
   width: 100%;
-  max-width: 380px;
+  max-width: 480px;
+}
+
+.room-gate-title {
+  font-size: clamp(28px, 5vw, 38px);
+  line-height: 1.15;
 }
 
 .room-gate-code {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 14px;
-  letter-spacing: 0.08em;
-  color: var(--color-ink-faint);
-  text-transform: uppercase;
+  display: inline-block;
+  font-size: 0.9em;
+  letter-spacing: 0.12em;
+  background: var(--color-sun);
+  border: var(--stroke) solid var(--color-ink);
+  border-radius: 12px;
+  padding: 0 10px;
+  rotate: -3deg;
+  box-shadow: 3px 3px 0 var(--color-ink);
 }

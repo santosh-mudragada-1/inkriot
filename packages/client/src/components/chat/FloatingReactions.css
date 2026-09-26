@@ -4,11 +4,12 @@
   pointer-events: none;
   overflow: hidden;
   z-index: 20;
+  border-radius: var(--radius-lg);
 }
 
 .floating-reaction {
   position: absolute;
-  bottom: 10%;
-  font-size: 30px;
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.15));
+  bottom: 8%;
+  font-size: 40px;
+  filter: drop-shadow(0 3px 0 rgba(27, 19, 64, 0.25));
 }

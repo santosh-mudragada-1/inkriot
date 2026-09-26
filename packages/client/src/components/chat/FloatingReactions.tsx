@@ -20,9 +20,9 @@ export function FloatingReactions() {
             className="floating-reaction"
             style={{ left: `${r.left}%` }}
             initial={{ opacity: 0, y: 20, scale: 0.4, rotate: 0 }}
-            animate={{ opacity: 1, y: -90, scale: 1.2, rotate: r.rotate }}
+            animate={{ opacity: [0, 1, 1, 0], y: -180, scale: [0.4, 1.4, 1.1, 1], rotate: r.rotate }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.8, ease: "easeOut" }}
+            transition={{ duration: 2, ease: "easeOut", times: [0, 0.15, 0.7, 1] }}
           >
             {r.emoji}
           </motion.span>

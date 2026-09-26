@@ -1,0 +1,61 @@
+.progress-toasts {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 8000;
+  pointer-events: none;
+  width: min(420px, calc(100vw - 32px));
+  display: flex;
+  justify-content: center;
+}
+
+.progress-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px 12px 14px;
+  background: var(--color-sun);
+  border: var(--stroke) solid var(--color-ink);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-pop);
+  cursor: pointer;
+}
+.progress-toast.is-level {
+  background: var(--color-grape);
+  color: #fff;
+}
+
+.progress-toast-emoji {
+  font-size: 34px;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  background: var(--color-bg-raised);
+  border: var(--stroke) solid var(--color-ink);
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: wiggle 0.6s ease-in-out infinite;
+}
+
+.progress-toast-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+.progress-toast-kicker {
+  font-family: var(--font-hand);
+  font-size: 17px;
+}
+.progress-toast-text strong {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 21px;
+}
+.progress-toast-desc {
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0.8;
+}

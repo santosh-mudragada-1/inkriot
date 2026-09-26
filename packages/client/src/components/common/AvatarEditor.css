@@ -1,0 +1,192 @@
+.avatar-editor-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(27, 19, 64, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  overflow-y: auto;
+}
+
+.avatar-editor {
+  position: relative;
+  width: min(720px, 100%);
+  background: var(--color-paper);
+  border: var(--stroke) solid var(--color-ink);
+  border-radius: var(--radius-lg);
+  box-shadow: 10px 10px 0 var(--color-ink);
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  outline: none;
+}
+
+.avatar-editor-title {
+  font-size: clamp(28px, 4vw, 38px);
+  text-align: center;
+  margin-bottom: var(--space-4);
+}
+
+.avatar-editor-body {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.avatar-editor-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-3);
+  background: var(--color-bg);
+  background-image:
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 16px 16px;
+  border: var(--stroke) dashed var(--color-ink-faint);
+  border-radius: var(--radius-md);
+}
+
+.avatar-editor-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ae-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.ae-label {
+  font-weight: 900;
+  font-size: 15px;
+}
+.ae-label em {
+  font-size: 16px;
+  font-style: normal;
+  color: var(--color-ink-soft);
+}
+
+.ae-stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-bg-raised);
+  border: var(--stroke) solid var(--color-ink);
+  border-radius: var(--radius-pill);
+  padding: 3px;
+}
+.ae-stepper button {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-sun);
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.ae-stepper button:hover {
+  background: var(--color-gum);
+}
+.ae-count {
+  min-width: 42px;
+  text-align: center;
+  font-weight: 900;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ae-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ae-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ae-color {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: var(--stroke) solid var(--color-ink);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-spring);
+}
+.ae-color:hover {
+  transform: scale(1.15) rotate(-8deg);
+}
+.ae-color.is-active {
+  box-shadow: 0 0 0 3px var(--color-paper), 0 0 0 6px var(--color-ink);
+  transform: scale(1.1);
+}
+
+.ae-hats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.ae-hat {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  background: var(--color-bg-raised);
+  border: var(--stroke) solid var(--color-ink);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  padding: 2px;
+  transition: transform var(--dur-fast) var(--ease-spring);
+}
+.ae-hat:hover:not(:disabled) {
+  transform: translateY(-3px) rotate(-3deg);
+}
+.ae-hat.is-active {
+  background: var(--color-sun);
+  box-shadow: 3px 3px 0 var(--color-ink);
+}
+.ae-hat.is-locked {
+  cursor: not-allowed;
+}
+.ae-hat.is-locked svg {
+  filter: grayscale(1) opacity(0.35);
+}
+.ae-lock {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  translate: -50% 0;
+  font-size: 10px;
+  font-weight: 900;
+  background: var(--color-ink);
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.avatar-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+@media (max-width: 640px) {
+  .avatar-editor-body {
+    grid-template-columns: 1fr;
+  }
+  .avatar-editor {
+    padding: var(--space-5) var(--space-4) var(--space-4);
+  }
+}

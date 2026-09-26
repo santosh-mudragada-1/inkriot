@@ -1,6 +1,14 @@
 import { create } from "zustand";
 import type { GuessMessage, ReactionEvent, RoomSnapshot, ScorePopup } from "@inkriot/shared";
 
+export interface GalleryItem {
+  id: string;
+  word: string;
+  artistId: string | null;
+  image: string;
+  guessed: number;
+}
+
 interface GameState {
   connected: boolean;
   room: RoomSnapshot | null;
@@ -9,6 +17,8 @@ interface GameState {
   guesses: GuessMessage[];
   scorePopups: ScorePopup[];
   reactions: ReactionEvent[];
+  /** This game's finished drawings, captured locally at each round reveal. */
+  gallery: GalleryItem[];
 
   setConnected: (v: boolean) => void;
   setRoom: (room: RoomSnapshot) => void;
@@ -19,6 +29,7 @@ interface GameState {
   removeScorePopup: (id: string) => void;
   addReaction: (reaction: ReactionEvent) => void;
   removeReaction: (id: string) => void;
+  addGalleryItem: (item: GalleryItem) => void;
   reset: () => void;
 }
 
@@ -30,6 +41,7 @@ export const useGameStore = create<GameState>((set) => ({
   guesses: [],
   scorePopups: [],
   reactions: [],
+  gallery: [],
 
   setConnected: (v) => set({ connected: v }),
   setRoom: (room) =>
@@ -37,7 +49,8 @@ export const useGameStore = create<GameState>((set) => ({
       const known = new Set(state.guesses.map((g) => g.id));
       const merged = [...state.guesses, ...room.guesses.filter((g) => !known.has(g.id))];
       if (room.phase === "WORD_SELECTION" && state.room?.phase !== "WORD_SELECTION") {
-        return { room, guesses: [] };
+        // a fresh game (coming from the lobby) also starts a fresh gallery
+        return state.room?.phase === "LOBBY" ? { room, guesses: [], gallery: [] } : { room, guesses: [] };
       }
       return { room, guesses: merged.slice(-60) };
     }),
@@ -49,5 +62,7 @@ export const useGameStore = create<GameState>((set) => ({
   removeScorePopup: (id) => set((state) => ({ scorePopups: state.scorePopups.filter((p) => p.id !== id) })),
   addReaction: (reaction) => set((state) => ({ reactions: [...state.reactions, reaction] })),
   removeReaction: (id) => set((state) => ({ reactions: state.reactions.filter((r) => r.id !== id) })),
-  reset: () => set({ room: null, guesses: [], scorePopups: [], reactions: [], errorMessage: null }),
+  addGalleryItem: (item) =>
+    set((state) => (state.gallery.some((g) => g.id === item.id) ? state : { gallery: [...state.gallery, item].slice(-24) })),
+  reset: () => set({ gallery: [], room: null, guesses: [], scorePopups: [], reactions: [], errorMessage: null }),
 }));

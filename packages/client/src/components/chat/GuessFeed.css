@@ -8,32 +8,88 @@
   min-height: 0;
 }
 
+.guess-empty {
+  margin: auto 0;
+  text-align: center;
+  color: var(--color-ink-faint);
+  font-size: 19px;
+  padding: var(--space-4);
+}
+
 .guess-line {
+  align-self: flex-start;
+  max-width: 92%;
   font-size: 14px;
-  line-height: 1.4;
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
+  line-height: 1.35;
+  padding: 6px 12px;
+  border-radius: 14px 14px 14px 4px;
+  background: var(--color-paper);
+  border: 2px solid var(--color-line-strong);
   word-break: break-word;
 }
 
-.guess-line.is-correct {
-  background: rgba(216, 255, 62, 0.6);
-  font-weight: 700;
+.guess-line.is-mine {
+  align-self: flex-end;
+  border-radius: 14px 14px 4px 14px;
+  background: #efeaff;
+}
+
+.guess-name {
+  color: var(--pc);
+  -webkit-text-stroke: 0.4px var(--color-ink);
+  margin-right: 6px;
+  font-weight: 900;
 }
 
 .guess-line.is-close {
-  background: rgba(255, 77, 26, 0.08);
-}
-
-.guess-line.is-system {
-  text-align: center;
-  color: var(--color-ink-faint);
-  font-size: 12px;
-  font-style: italic;
+  border-color: var(--color-sun);
+  background: #fff5d1;
 }
 
 .close-hint {
-  color: var(--color-accent);
+  display: inline-block;
+  margin-left: 6px;
   font-style: normal;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  background: var(--color-sun);
+  border: 1.5px solid var(--color-ink);
+  border-radius: var(--radius-pill);
+  padding: 0 6px;
+}
+
+.guess-line.is-correct {
+  align-self: stretch;
+  max-width: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  background: var(--color-mint);
+  border: 2.5px solid var(--color-ink);
+  border-radius: var(--radius-sm);
+  box-shadow: 3px 3px 0 var(--color-ink);
+}
+.correct-check {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-bg-raised);
+  border: 2px solid var(--color-ink);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.guess-line.is-system {
+  align-self: center;
+  text-align: center;
+  color: var(--color-ink-soft);
+  background: transparent;
+  border: none;
+  font-family: var(--font-hand);
+  font-size: 17px;
+  padding: 2px 8px;
 }

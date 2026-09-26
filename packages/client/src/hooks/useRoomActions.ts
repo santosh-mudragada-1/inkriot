@@ -4,6 +4,7 @@ import type { JoinRoomResult } from "@inkriot/shared";
 import { socket } from "../lib/socket";
 import { saveSession, saveNickname } from "../lib/session";
 import { useGameStore } from "../store/useGameStore";
+import { useProfile } from "../lib/profile";
 
 function withTimeout<T>(fn: (cb: (res: T) => void) => void, ms = 6000): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -25,7 +26,7 @@ export function useRoomActions() {
       setPending(true);
       setError(null);
       try {
-        const res = await withTimeout<JoinRoomResult>((cb) => socket.emit("create_room", { nickname }, cb));
+        const res = await withTimeout<JoinRoomResult>((cb) => socket.emit("create_room", { nickname, avatar: useProfile.getState().encoded() }, cb));
         if (!res.ok || !res.code || !res.sessionId || !res.playerId) {
           setError(res.error ?? "Something went wrong creating the room.");
           return;
@@ -49,7 +50,7 @@ export function useRoomActions() {
       setError(null);
       try {
         const cleanCode = code.trim().toUpperCase();
-        const res = await withTimeout<JoinRoomResult>((cb) => socket.emit("join_room", { code: cleanCode, nickname }, cb));
+        const res = await withTimeout<JoinRoomResult>((cb) => socket.emit("join_room", { code: cleanCode, nickname, avatar: useProfile.getState().encoded() }, cb));
         if (!res.ok || !res.code || !res.sessionId || !res.playerId) {
           setError(res.error ?? "Couldn't join that room.");
           return;

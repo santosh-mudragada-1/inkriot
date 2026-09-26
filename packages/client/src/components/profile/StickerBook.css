@@ -1,0 +1,91 @@
+.sticker-book {
+  background: var(--color-paper);
+  border: var(--stroke) solid var(--color-ink);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  box-shadow: var(--shadow-card);
+}
+
+.sticker-book-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+.sticker-book-head h2 {
+  font-size: 22px;
+}
+.sticker-book-count {
+  font-family: var(--font-hand);
+  font-size: 22px;
+  color: var(--color-ink-soft);
+}
+
+.sticker-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(46px, 1fr));
+  gap: 10px;
+}
+
+.sticker-slot {
+  position: relative;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2.5px dashed var(--color-ink-faint);
+  background: transparent;
+  cursor: default;
+  outline-offset: 2px;
+}
+.sticker-slot.is-got {
+  border: 2.5px solid var(--color-ink);
+  background: var(--color-bg-raised);
+  box-shadow: 0 0 0 3px #fff, 2px 3px 0 3px rgba(27, 19, 64, 0.25);
+}
+.sticker-emoji {
+  font-size: 22px;
+}
+.sticker-slot:not(.is-got) .sticker-emoji {
+  font-family: var(--font-display);
+  color: var(--color-ink-faint);
+  font-size: 18px;
+}
+
+.sticker-tip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  translate: -50% 0;
+  width: max-content;
+  max-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  background: var(--color-ink);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.25;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity var(--dur-fast) ease, transform var(--dur-fast) ease;
+  z-index: 10;
+  rotate: 0deg;
+}
+.sticker-tip strong {
+  font-size: 13px;
+  color: var(--color-sun);
+}
+.sticker-slot:hover .sticker-tip,
+.sticker-slot:focus-visible .sticker-tip {
+  opacity: 1;
+  transform: translateY(0);
+}

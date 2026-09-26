@@ -1,0 +1,225 @@
+.profile-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  background: var(--color-bg-raised);
+  border: var(--stroke) solid var(--color-ink);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-pop);
+}
+
+.profile-top {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.profile-avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 124px;
+  height: 124px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: var(--stroke) solid var(--color-ink);
+  background:
+    radial-gradient(circle at 30% 30%, #fff 0 30%, transparent 31%),
+    var(--color-sun);
+  cursor: pointer;
+  padding: 0;
+  overflow: visible;
+}
+.profile-avatar svg {
+  margin-top: 10px;
+}
+.profile-avatar-edit {
+  position: absolute;
+  bottom: -8px;
+  right: -6px;
+  font-size: 12px;
+  font-weight: 900;
+  background: var(--color-grape);
+  color: #fff;
+  border: 2.5px solid var(--color-ink);
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
+  rotate: 6deg;
+}
+
+.profile-id {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-label {
+  font-size: 19px;
+  color: var(--color-ink-soft);
+  line-height: 1;
+}
+
+.profile-name-input {
+  width: 100%;
+  font-family: var(--font-display);
+  font-size: 30px;
+  color: var(--color-ink);
+  background: transparent;
+  border: none;
+  border-bottom: var(--stroke) dashed var(--color-ink-faint);
+  padding: 2px 0 4px;
+  outline: none;
+}
+.profile-name-input::placeholder {
+  color: var(--color-ink-faint);
+  opacity: 0.6;
+}
+.profile-name-input:focus {
+  border-bottom-style: solid;
+  border-bottom-color: var(--color-grape);
+}
+.profile-name-input[aria-invalid="true"] {
+  border-bottom-color: var(--color-danger);
+}
+
+/* XP bar */
+.xp-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+.xp-bar-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.xp-level {
+  font-family: var(--font-display);
+  font-size: 16px;
+  background: var(--color-ink);
+  color: var(--color-sun);
+  padding: 1px 9px;
+  border-radius: var(--radius-pill);
+}
+.xp-title {
+  font-size: 18px;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.xp-num {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--color-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.xp-track {
+  height: 14px;
+  border: 2.5px solid var(--color-ink);
+  border-radius: var(--radius-pill);
+  background: var(--color-paper);
+  overflow: hidden;
+}
+.xp-fill {
+  height: 100%;
+  background: repeating-linear-gradient(-45deg, var(--color-mint) 0 8px, #5de3b8 8px 16px);
+  border-right: 2.5px solid var(--color-ink);
+  border-radius: var(--radius-pill);
+  animation: xp-stripes 1.2s linear infinite;
+  background-size: 22.6px 22.6px;
+}
+@keyframes xp-stripes {
+  to {
+    background-position: 22.6px 0;
+  }
+}
+.xp-bar.is-compact .xp-title {
+  font-size: 16px;
+}
+
+/* stats */
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.pstat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 4px;
+  border: 2.5px solid var(--color-ink);
+  border-radius: var(--radius-md);
+  background: var(--color-paper);
+  line-height: 1.1;
+}
+.pstat strong {
+  font-family: var(--font-ui);
+  font-weight: 900;
+  font-size: 24px;
+}
+.pstat span:last-child {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-ink-soft);
+}
+.pstat-emoji {
+  font-size: 18px;
+}
+.pstat-streak.is-hot {
+  background: var(--color-tomato);
+  color: #fff;
+}
+.pstat-streak.is-hot span:last-child {
+  color: #fff;
+}
+.pstat-streak.is-hot .pstat-emoji {
+  animation: wiggle 0.8s ease-in-out infinite;
+}
+
+.profile-risk {
+  font-weight: 900;
+  font-size: 14px;
+  background: var(--color-sun);
+  border: 2.5px solid var(--color-ink);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  text-align: center;
+}
+.profile-hint {
+  font-size: 18px;
+  color: var(--color-ink-soft);
+  text-align: center;
+  line-height: 1.2;
+}
+
+@media (max-width: 480px) {
+  .profile-card {
+    padding: var(--space-4);
+  }
+  .profile-avatar {
+    width: 96px;
+    height: 96px;
+  }
+  .profile-avatar svg {
+    width: 88px;
+    height: 88px;
+  }
+  .profile-name-input {
+    font-size: 24px;
+  }
+  .pstat strong {
+    font-size: 20px;
+  }
+  .pstat span:last-child {
+    font-size: 9px;
+  }
+}

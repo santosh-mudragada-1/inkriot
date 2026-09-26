@@ -1,10 +1,13 @@
 import { motion } from "framer-motion";
-import { WORD_SELECTION_SECONDS } from "@inkriot/shared";
+import { WORD_SELECTION_SECONDS, wordDifficulty } from "@inkriot/shared";
 import { useGameStore } from "../../store/useGameStore";
 import { socket } from "../../lib/socket";
 import { audio } from "../../lib/audio/AudioManager";
 import { useCountdown } from "../../hooks/useCountdown";
+import { DoodleAvatar } from "../common/DoodleAvatar";
 import "./WordSelectOverlay.css";
+
+const DIFF_LABEL = { easy: "easy", medium: "medium", hard: "tricky" } as const;
 
 export function WordSelectOverlay() {
   const room = useGameStore((s) => s.room)!;
@@ -12,44 +15,58 @@ export function WordSelectOverlay() {
   const isArtist = selfId === room.artistId;
   const remainingMs = useCountdown(room.phaseEndsAt);
   const artist = room.players.find((p) => p.id === room.artistId);
+  const secs = Math.ceil(remainingMs / 1000);
 
   return (
     <motion.div className="overlay-scrim" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
       {isArtist ? (
         <div className="word-select">
-          <p className="word-select-hint">Pick something to draw</p>
+          <motion.p className="word-select-hint" initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+            Your turn to draw! Pick one
+          </motion.p>
           <div className="word-cards">
-            {(room.wordChoices ?? []).map((word, i) => (
-              <motion.button
-                key={word}
-                className="word-card"
-                initial={{ opacity: 0, y: 24, rotate: (i - 1) * 6 }}
-                animate={{ opacity: 1, y: 0, rotate: (i - 1) * 4 }}
-                transition={{ delay: i * 0.08, type: "spring", stiffness: 300, damping: 22 }}
-                whileHover={{ y: -8, rotate: 0, scale: 1.04, transition: { duration: 0.16, ease: "easeOut" } }}
-                whileTap={{ scale: 0.96, transition: { duration: 0.08 } }}
-                onClick={() => {
-                  audio.playWordSelect();
-                  socket.emit("select_word", word);
-                }}
-              >
-                {word}
-              </motion.button>
-            ))}
+            {(room.wordChoices ?? []).map((word, i) => {
+              const diff = wordDifficulty(word);
+              return (
+                <motion.button
+                  key={word}
+                  className={`word-card diff-${diff}`}
+                  initial={{ opacity: 0, y: 60, rotateY: 90, rotate: (i - 1) * 8 }}
+                  animate={{ opacity: 1, y: 0, rotateY: 0, rotate: (i - 1) * 4 }}
+                  transition={{ delay: 0.1 + i * 0.12, type: "spring", stiffness: 300, damping: 20 }}
+                  whileHover={{ y: -12, rotate: 0, scale: 1.06 }}
+                  whileTap={{ scale: 0.94 }}
+                  onHoverStart={() => audio.playHover()}
+                  onClick={() => {
+                    audio.playWordSelect();
+                    socket.emit("select_word", word);
+                  }}
+                >
+                  <span className="word-card-diff">{DIFF_LABEL[diff]}</span>
+                  <span className="word-card-word">{word}</span>
+                  <span className="word-card-meta">{word.replace(/[^a-z]/gi, "").length} letters</span>
+                </motion.button>
+              );
+            })}
           </div>
+          <p className={`word-select-timer hand ${secs <= 4 ? "urgent" : ""}`}>
+            auto-picks in {secs}s
+          </p>
         </div>
       ) : (
         <motion.div
           className="waiting-card"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, scale: 0.8, rotate: -4 }}
+          animate={{ opacity: 1, scale: 1, rotate: -1 }}
+          transition={{ type: "spring", stiffness: 400, damping: 20 }}
         >
-          <div className="waiting-avatar" style={{ background: artist?.color }}>
-            {artist?.name.charAt(0).toUpperCase()}
-          </div>
-          <p>
-            <b>{artist?.name ?? "Someone"}</b> is choosing a word…
+          <motion.div animate={{ rotate: [-6, 6, -6] }} transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}>
+            <DoodleAvatar avatar={artist?.avatar} seed={artist?.id} size={110} />
+          </motion.div>
+          <p className="waiting-text">
+            <b>{artist?.name ?? "Someone"}</b> is picking a word…
           </p>
+          <span className="hand waiting-sub">get your typing fingers ready</span>
           <div className="waiting-bar">
             <motion.div
               className="waiting-bar-fill"

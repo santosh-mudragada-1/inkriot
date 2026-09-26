@@ -1,13 +1,17 @@
 .overlay-scrim {
   position: absolute;
   inset: 0;
-  background: rgba(244, 240, 232, 0.92);
-  backdrop-filter: blur(2px);
+  background:
+    radial-gradient(circle, rgba(27, 19, 64, 0.08) 1.5px, transparent 1.6px) 0 0 / 18px 18px,
+    rgba(207, 230, 255, 0.94);
+  backdrop-filter: blur(3px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 40;
   border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  overflow: auto;
 }
 
 .word-select {
@@ -15,76 +19,134 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-5);
+  perspective: 900px;
 }
 
 .word-select-hint {
   font-family: var(--font-display);
-  font-size: clamp(20px, 3vw, 28px);
-  font-weight: 800;
+  font-size: clamp(24px, 3.4vw, 36px);
+  text-align: center;
+}
+
+.word-select-timer {
+  font-size: 22px;
+  color: var(--color-ink-soft);
+}
+.word-select-timer.urgent {
+  color: var(--color-tomato);
 }
 
 .word-cards {
   display: flex;
-  gap: var(--space-4);
+  gap: var(--space-5);
   flex-wrap: wrap;
   justify-content: center;
 }
 
 .word-card {
-  font-family: var(--font-display);
-  font-size: clamp(18px, 2.4vw, 24px);
-  font-weight: 800;
-  text-transform: uppercase;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 170px;
+  max-width: 240px;
+  padding: var(--space-5) var(--space-5) var(--space-4);
   background: var(--color-bg-raised);
-  border: 2.5px solid var(--color-ink);
-  border-radius: var(--radius-md);
-  padding: var(--space-5) var(--space-6);
-  box-shadow: var(--shadow-pop);
+  border: var(--stroke) solid var(--color-ink);
+  border-radius: var(--radius-lg);
+  box-shadow: 7px 8px 0 var(--color-ink);
   cursor: pointer;
+  color: var(--color-ink);
+}
+.word-card.diff-easy {
+  background: var(--color-mint);
+}
+.word-card.diff-medium {
+  background: var(--color-sun);
+}
+.word-card.diff-hard {
+  background: var(--color-gum);
 }
 
-.word-card:nth-child(2) {
-  background: var(--color-secondary);
+.word-card-diff {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  translate: -50% 0;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--color-ink);
+  color: #fff;
+  border-radius: var(--radius-pill);
+  padding: 3px 12px;
+  white-space: nowrap;
 }
-.word-card:nth-child(3) {
-  background: var(--color-accent);
-  color: var(--color-accent-ink);
+
+.word-card-word {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.6vw, 30px);
+  line-height: 1.05;
+  text-align: center;
+}
+
+.word-card-meta {
+  font-size: 12px;
+  font-weight: 900;
+  opacity: 0.7;
 }
 
 .waiting-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   background: var(--color-bg-raised);
-  border: 2px solid var(--color-ink);
+  border: var(--stroke) solid var(--color-ink);
   border-radius: var(--radius-lg);
-  padding: var(--space-6);
+  padding: var(--space-5) var(--space-6);
   box-shadow: var(--shadow-pop);
   text-align: center;
 }
 
-.waiting-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  border: 2px solid var(--color-ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.waiting-text {
+  font-size: 20px;
+  font-weight: 700;
+}
+.waiting-text b {
   font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 22px;
+  font-weight: 400;
+}
+.waiting-sub {
+  font-size: 19px;
+  color: var(--color-ink-soft);
 }
 
 .waiting-bar {
-  width: 180px;
-  height: 6px;
+  width: 200px;
+  height: 12px;
+  margin-top: var(--space-2);
   border-radius: var(--radius-pill);
-  background: var(--color-line);
+  border: 2.5px solid var(--color-ink);
+  background: var(--color-paper);
   overflow: hidden;
 }
 .waiting-bar-fill {
   height: 100%;
-  background: var(--color-accent);
+  background: var(--color-tomato);
+}
+
+@media (max-width: 640px) {
+  .word-cards {
+    gap: var(--space-4);
+  }
+  .word-card {
+    min-width: 0;
+    width: 100%;
+    max-width: 280px;
+    padding: var(--space-4);
+    box-shadow: 4px 5px 0 var(--color-ink);
+  }
 }

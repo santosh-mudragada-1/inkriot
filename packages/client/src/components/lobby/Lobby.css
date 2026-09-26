@@ -2,99 +2,257 @@
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
-  padding: var(--space-5) var(--space-6);
-  max-width: 1100px;
+  gap: var(--space-5);
+  padding: var(--space-4) var(--space-6) var(--space-6);
+  max-width: 1240px;
+  width: 100%;
+  min-width: 0;
   margin: 0 auto;
 }
 
 .lobby-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   flex-wrap: wrap;
   gap: var(--space-4);
-}
-
-.lobby-title {
-  font-size: clamp(28px, 4vw, 44px);
-}
-
-.lobby-subtitle {
-  color: var(--color-ink-soft);
-  margin-top: 4px;
+  padding-right: 110px; /* keep clear of the fixed sound buttons */
 }
 
 .lobby-room-info {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-4);
+  margin-left: auto;
 }
 
 .room-code-badge {
   display: flex;
   flex-direction: column;
   align-items: center;
-  border: 2px solid var(--color-ink);
+  border: var(--stroke) solid var(--color-ink);
   border-radius: var(--radius-md);
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-secondary);
+  padding: 2px var(--space-4) 6px;
+  background: var(--color-sun);
+  box-shadow: 4px 4px 0 var(--color-ink);
+  line-height: 1;
 }
 .room-code-badge span {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  font-size: 17px;
 }
 .room-code-badge strong {
   font-family: var(--font-display);
-  font-size: 24px;
-  letter-spacing: 0.1em;
+  font-weight: 400;
+  font-size: 38px;
+  letter-spacing: 0.14em;
+  margin-right: -0.14em;
 }
 
 .lobby-players {
-  flex: 1;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4);
-  align-content: flex-start;
+  gap: var(--space-5) var(--space-5);
   justify-content: center;
-  padding: var(--space-4);
+  padding: var(--space-4) 0 var(--space-6);
 }
 
-.lobby-footer {
+.open-seat {
+  width: 132px;
+  min-height: 170px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
-  border-top: 2px dashed var(--color-line-strong);
-  padding-top: var(--space-4);
-  text-align: center;
-}
-
-.lobby-count {
-  font-weight: 700;
+  justify-content: center;
+  gap: 6px;
+  border: var(--stroke) dashed var(--color-ink-faint);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.35);
   color: var(--color-ink-soft);
-  text-align: center;
-  margin: 0;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background var(--dur-fast) ease, transform var(--dur-fast) var(--ease-spring);
+}
+.open-seat:hover {
+  background: rgba(255, 255, 255, 0.75);
+  transform: rotate(-2deg) scale(1.03);
+  border-color: var(--color-grape);
+  color: var(--color-grape);
+}
+.open-seat-plus {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: var(--stroke) dashed currentColor;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 32px;
 }
 
-.lobby-settings-preview {
+.lobby-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+/* doodle wall */
+.doodle-wall {
   display: flex;
-  gap: var(--space-2);
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.doodle-wall-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.doodle-wall-head h2 {
+  font-size: 26px;
+}
+.doodle-wall-head .hand {
+  font-size: 19px;
+  color: var(--color-ink-soft);
+}
+.doodle-wall-canvas {
+  height: 340px;
+  rotate: -0.6deg;
+}
+.doodle-wall-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.wall-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: var(--stroke) solid var(--color-ink);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-spring);
+}
+.wall-swatch:hover {
+  transform: scale(1.18) rotate(-10deg);
+}
+.wall-swatch.active {
+  box-shadow: 0 0 0 3px var(--color-bg), 0 0 0 6px var(--color-ink);
+}
+.wall-sep {
+  width: 3px;
+  height: 24px;
+  background: var(--color-line-strong);
+  border-radius: 2px;
+  margin: 0 4px;
+}
+.wall-size {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.wall-size span {
+  border-radius: 50%;
+  background: var(--color-ink);
+}
+.wall-size.active {
+  border-color: var(--color-ink);
+  background: var(--color-sun);
+}
+.wall-clear {
+  margin-left: auto;
+  font-family: var(--font-hand);
+  font-size: 19px;
+  background: none;
+  border: none;
+  color: var(--color-ink-soft);
+  text-decoration: underline wavy;
+  cursor: pointer;
+}
+.wall-clear:hover {
+  color: var(--color-danger);
+}
+
+/* guest waiting card */
+.lobby-waiting-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-5);
+  background: var(--color-paper);
+  border: var(--stroke) solid var(--color-ink);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-pop);
+  text-align: center;
+  rotate: 0.8deg;
+}
+.lobby-waiting-card h2 {
+  font-size: 40px;
+}
+.lobby-settings-preview {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--color-ink-faint);
+  gap: 8px;
+}
+.lobby-settings-preview li {
+  font-weight: 800;
+  background: var(--color-bg-raised);
+  border: 2.5px solid var(--color-ink);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+}
+.lobby-settings-preview strong {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 18px;
+}
+.lobby-waiting {
+  font-size: 22px;
+  color: var(--color-grape);
 }
 
-.lobby-waiting {
-  font-weight: 700;
-  color: var(--color-ink-soft);
+@media (max-width: 900px) {
+  .lobby-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lobby-side {
+    order: -1;
+  }
 }
 
 @media (max-width: 640px) {
   .lobby {
-    padding: var(--space-4);
+    padding: var(--space-3) var(--space-4) var(--space-6);
+  }
+  .lobby-header {
+    padding-right: 90px;
+  }
+  .lobby-room-info {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .room-code-badge strong {
+    font-size: 30px;
+  }
+  .player-card,
+  .open-seat {
+    width: 104px;
+  }
+  .open-seat {
+    min-height: 150px;
+  }
+  .doodle-wall-canvas {
+    height: 260px;
   }
 }

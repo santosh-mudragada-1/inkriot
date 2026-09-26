@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import { CustomCursor } from "./components/common/CustomCursor";
 import { SoundToggle } from "./components/common/SoundToggle";
+import { ProgressToasts } from "./components/common/ProgressToasts";
 import { useSocketBridge } from "./hooks/useSocketBridge";
 import { audio } from "./lib/audio/AudioManager";
 import LandingPage from "./pages/LandingPage";
@@ -29,6 +30,7 @@ export default function App() {
     <>
       <CustomCursor />
       <SoundToggle />
+      <ProgressToasts />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/room/:code" element={<RoomPage />} />

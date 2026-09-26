@@ -2,9 +2,19 @@ import type { DrawOp, DrawTool, Point } from "@inkriot/shared";
 
 const BG_COLOR = "#FFFFFF";
 
+/**
+ * Stroke sizes are authored against an 800px-wide canvas and scaled to the local
+ * canvas width, so a thick line looks equally thick on a phone and a desktop.
+ */
+const REFERENCE_WIDTH = 800;
+
 interface ActiveStroke {
+  /** last raw point */
   x: number;
   y: number;
+  /** midpoint the previous curve segment ended on */
+  mx: number;
+  my: number;
   tool: DrawTool;
   color: string;
   size: number;
@@ -29,8 +39,8 @@ export class CanvasEngine {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     this.canvas.width = Math.max(1, Math.floor(cssWidth * dpr));
     this.canvas.height = Math.max(1, Math.floor(cssHeight * dpr));
-    this.canvas.style.width = `${cssWidth}px`;
-    this.canvas.style.height = `${cssHeight}px`;
+    // CSS keeps the element at 100% of its frame; fixed px sizes here would stop the
+    // frame from ever shrinking (the canvas would prop it open on narrow screens).
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.width = cssWidth;
     this.height = cssHeight;
@@ -61,17 +71,16 @@ export class CanvasEngine {
     this.ctx.fillRect(0, 0, this.width, this.height);
   }
 
+  private scaledSize(size: number) {
+    return Math.max(1, size * (this.width / REFERENCE_WIDTH));
+  }
+
   private lineStyleFor(stroke: ActiveStroke) {
     this.ctx.lineCap = "round";
     this.ctx.lineJoin = "round";
-    if (stroke.tool === "eraser") {
-      this.ctx.strokeStyle = BG_COLOR;
-      this.ctx.lineWidth = stroke.size * 1.6;
-    } else {
-      this.ctx.strokeStyle = stroke.color;
-      this.ctx.lineWidth = stroke.size;
-      this.ctx.globalAlpha = stroke.tool === "marker" ? 0.75 : 1;
-    }
+    this.ctx.globalAlpha = 1;
+    this.ctx.strokeStyle = stroke.tool === "eraser" ? BG_COLOR : stroke.color;
+    this.ctx.lineWidth = this.scaledSize(stroke.size);
   }
 
   /** Apply one op to the raster immediately (used both live and during replay). */
@@ -88,16 +97,13 @@ export class CanvasEngine {
     if (op.type === "start") {
       const x = op.point.x * this.width;
       const y = op.point.y * this.height;
-      this.active.set(op.strokeId, { x, y, tool: op.tool, color: op.color, size: op.size });
-      const stroke = this.active.get(op.strokeId)!;
+      const stroke: ActiveStroke = { x, y, mx: x, my: y, tool: op.tool, color: op.color, size: op.size };
+      this.active.set(op.strokeId, stroke);
       this.lineStyleFor(stroke);
       this.ctx.beginPath();
-      this.ctx.arc(x, y, stroke.size / 2, 0, Math.PI * 2);
+      this.ctx.arc(x, y, this.scaledSize(stroke.size) / 2, 0, Math.PI * 2);
       this.ctx.fillStyle = stroke.tool === "eraser" ? BG_COLOR : stroke.color;
-      const prevAlpha = this.ctx.globalAlpha;
-      if (stroke.tool === "marker") this.ctx.globalAlpha = 0.75;
       this.ctx.fill();
-      this.ctx.globalAlpha = prevAlpha;
       return;
     }
     if (op.type === "point") {
@@ -105,17 +111,30 @@ export class CanvasEngine {
       if (!stroke) return;
       const x = op.point.x * this.width;
       const y = op.point.y * this.height;
+      // Quadratic smoothing: curve from the last midpoint to the new midpoint, using the
+      // previous raw point as the control. Removes the polyline "elbows" of fast strokes.
+      const mx = (stroke.x + x) / 2;
+      const my = (stroke.y + y) / 2;
       this.lineStyleFor(stroke);
       this.ctx.beginPath();
-      this.ctx.moveTo(stroke.x, stroke.y);
-      this.ctx.lineTo(x, y);
+      this.ctx.moveTo(stroke.mx, stroke.my);
+      this.ctx.quadraticCurveTo(stroke.x, stroke.y, mx, my);
       this.ctx.stroke();
-      this.ctx.globalAlpha = 1;
       stroke.x = x;
       stroke.y = y;
+      stroke.mx = mx;
+      stroke.my = my;
       return;
     }
     if (op.type === "end") {
+      const stroke = this.active.get(op.strokeId);
+      if (stroke) {
+        this.lineStyleFor(stroke);
+        this.ctx.beginPath();
+        this.ctx.moveTo(stroke.mx, stroke.my);
+        this.ctx.lineTo(stroke.x, stroke.y);
+        this.ctx.stroke();
+      }
       this.active.delete(op.strokeId);
     }
   }

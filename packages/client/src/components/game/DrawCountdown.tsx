@@ -4,7 +4,7 @@ import { useGameStore } from "../../store/useGameStore";
 import { audio } from "../../lib/audio/AudioManager";
 import "./DrawCountdown.css";
 
-const STEPS = ["3", "2", "1", "DRAW!"];
+const STEPS = ["3", "2", "1", "GO!"];
 
 export function DrawCountdown() {
   const phase = useGameStore((s) => s.room?.phase);
@@ -38,10 +38,10 @@ export function DrawCountdown() {
           <AnimatePresence mode="wait">
             <motion.span
               key={stepIndex}
-              className={`draw-countdown-step ${STEPS[stepIndex] === "DRAW!" ? "is-go" : ""}`}
-              initial={{ scale: 0.3, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 1.6, opacity: 0 }}
+              className={`draw-countdown-step ${STEPS[stepIndex] === "GO!" ? "is-go" : ""}`}
+              initial={{ scale: 0.2, opacity: 0, rotate: -30 }}
+              animate={{ scale: 1, opacity: 1, rotate: stepIndex % 2 ? 6 : -6 }}
+              exit={{ scale: 2, opacity: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
             >
               {STEPS[stepIndex]}

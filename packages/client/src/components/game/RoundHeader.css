@@ -1,66 +1,168 @@
 .round-header {
   display: grid;
-  grid-template-columns: 100px 1fr 56px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: var(--space-4);
-  padding: var(--space-3) var(--space-5);
+  padding: var(--space-2) 110px var(--space-2) var(--space-2); /* right gutter clears the sound buttons */
+  min-height: 72px;
 }
 
-.rh-block {
+.rh-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.rh-round {
   display: flex;
   flex-direction: column;
-  line-height: 1.1;
+  line-height: 1;
+  gap: 4px;
 }
 .rh-label {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  color: var(--color-ink-faint);
-  text-transform: uppercase;
+  font-size: 17px;
+  color: var(--color-ink-soft);
 }
-.rh-block strong {
-  font-family: var(--font-display);
-  font-size: 18px;
+.rh-pips {
+  display: flex;
+  gap: 5px;
+}
+.rh-pip {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2.5px solid var(--color-ink);
+  background: var(--color-bg-raised);
+}
+.rh-pip.done {
+  background: var(--color-ink);
+}
+.rh-pip.now {
+  background: var(--color-tomato);
+  animation: wiggle 1s ease-in-out infinite;
 }
 
 .rh-word {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
   text-align: center;
+}
+.rh-word-label {
+  font-size: 19px;
+  color: var(--color-ink-soft);
+  line-height: 1;
+}
+.rh-word-label b {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 900;
+  background: var(--color-ink);
+  color: #fff;
+  border-radius: var(--radius-pill);
+  padding: 1px 8px;
+  margin-left: 4px;
+  vertical-align: 2px;
+}
+
+.rh-artist-word {
   font-family: var(--font-display);
-  font-size: clamp(20px, 3vw, 30px);
-  font-weight: 800;
-  letter-spacing: 0.15em;
+  font-size: clamp(22px, 3.2vw, 34px);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--color-sun);
+  border: var(--stroke) solid var(--color-ink);
+  border-radius: var(--radius-md);
+  padding: 0 16px 2px;
+  box-shadow: 4px 4px 0 var(--color-ink);
+  rotate: -1.5deg;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.rh-artist-word.diff-medium {
+  background: var(--color-sky);
+}
+.rh-artist-word.diff-hard {
+  background: var(--color-gum);
+}
+
+.rh-choosing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 22px;
+}
+.rh-choosing svg,
+.rh-artist svg {
+  border-radius: 50%;
+  border: 2.5px solid var(--color-ink);
+  background: var(--color-bg-raised);
+}
+
+.rh-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+.rh-artist {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 19px;
+  min-width: 0;
+}
+.rh-artist .hand {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .rh-timer {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 2px solid var(--color-ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+.rh-timer svg {
+  display: block;
+}
+.rh-timer-num {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
   font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 17px;
-  background: var(--color-secondary);
-  justify-self: end;
+  font-size: 21px;
+  font-variant-numeric: tabular-nums;
+}
+.rh-timer.urgent .rh-timer-num {
+  color: var(--color-tomato);
 }
 
-.rh-timer.urgent {
-  background: var(--color-accent);
-  color: var(--color-accent-ink);
-  border-color: var(--color-accent);
-}
-
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .round-header {
-    grid-template-columns: 70px 1fr 40px;
-    padding: var(--space-2) var(--space-3);
+    grid-template-columns: auto 1fr auto;
+    padding: var(--space-1) 88px var(--space-1) var(--space-1);
     gap: var(--space-2);
+    min-height: 60px;
+  }
+  .rh-left .logo,
+  .rh-artist {
+    display: none;
   }
   .rh-timer {
-    width: 36px;
-    height: 36px;
-    font-size: 14px;
+    width: 50px;
+    height: 50px;
+  }
+  .rh-timer svg {
+    width: 50px;
+    height: 50px;
+  }
+  .rh-timer-num {
+    font-size: 18px;
   }
 }

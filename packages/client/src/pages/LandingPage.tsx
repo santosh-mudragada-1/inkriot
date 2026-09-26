@@ -1,145 +1,167 @@
-import { useState, type FormEvent } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { HeroScene } from "../components/landing/HeroScene";
+import { useEffect, useState, type FormEvent } from "react";
+import { motion } from "framer-motion";
+import { WORD_LIST } from "@inkriot/shared";
 import { Button } from "../components/common/Button";
+import { Logo } from "../components/common/Logo";
+import { ProfileCard } from "../components/profile/ProfileCard";
+import { StickerBook } from "../components/profile/StickerBook";
+import { PaperDoodles } from "../components/settings/PaperDoodles";
 import { useRoomActions } from "../hooks/useRoomActions";
-import { loadNickname } from "../lib/session";
+import { useProfile } from "../lib/profile";
+import { audio } from "../lib/audio/AudioManager";
 import "./LandingPage.css";
 
-type Mode = "closed" | "create" | "join";
+const HEADLINE = [
+  { word: "DRAW.", color: "var(--color-sun)", tilt: -3 },
+  { word: "GUESS.", color: "var(--color-gum)", tilt: 2 },
+  { word: "CHAOS.", color: "var(--color-tomato)", tilt: -1.5 },
+];
 
-const LINES = ["DRAW.", "GUESS.", "CHAOS."];
+const STEPS = [
+  { emoji: "🃏", title: "Pick a word", body: "The artist chooses one of three: easy, medium or hard." },
+  { emoji: "✏️", title: "Draw it", body: "Everyone else races to type the answer before time runs out." },
+  { emoji: "⚡", title: "Score big", body: "Faster guesses score more. Streaks stack bonus points." },
+];
+
+// A shuffled slice of real prompts for the ticker, fixed per page load.
+const TICKER = [...WORD_LIST].sort(() => Math.random() - 0.5).slice(0, 18);
+const TICKER_COLORS = ["var(--color-tomato)", "var(--color-grape)", "var(--color-mint)", "var(--color-sky)", "var(--color-gum)"];
 
 export default function LandingPage() {
-  const [mode, setMode] = useState<Mode>("closed");
-  const [nickname, setNickname] = useState(loadNickname());
+  const nickname = useProfile((s) => s.nickname);
   const [code, setCode] = useState("");
+  const [nameError, setNameError] = useState<string | null>(null);
   const { createRoom, joinRoom, pending, error, setError } = useRoomActions();
 
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!nickname.trim()) return setError("Give yourself a name first.");
-    if (mode === "create") createRoom(nickname.trim());
-    if (mode === "join") {
-      if (code.trim().length < 4) return setError("Room codes are 4 characters.");
-      joinRoom(code, nickname.trim());
+  useEffect(() => {
+    audio.setMusicMood("lobby");
+  }, []);
+
+  const requireName = () => {
+    if (nickname.trim()) {
+      setNameError(null);
+      return true;
     }
+    setNameError("Pick a name first — it's how friends will spot you.");
+    document.getElementById("nickname")?.focus();
+    audio.playWrong();
+    return false;
+  };
+
+  const create = () => {
+    if (!requireName()) return;
+    createRoom(nickname.trim());
+  };
+
+  const join = (e: FormEvent) => {
+    e.preventDefault();
+    if (!requireName()) return;
+    if (code.trim().length < 4) {
+      setError("Room codes are 4 characters.");
+      return;
+    }
+    joinRoom(code, nickname.trim());
   };
 
   return (
     <div className="landing">
       <header className="landing-nav">
-        <span className="brand-mark">INKRIOT</span>
+        <Logo />
       </header>
 
-      <main className="landing-hero">
-        <div className="landing-copy">
+      <main className="landing-main">
+        <section className="landing-copy">
+          <PaperDoodles />
+          <p className="landing-eyebrow hand">a drawing &amp; guessing party game ✦ free, no signup</p>
           <h1 className="landing-headline">
-            {LINES.map((line, i) => (
+            {HEADLINE.map((h, i) => (
               <motion.span
-                key={line}
-                className="headline-line"
-                initial={{ y: "110%", opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: i * 0.09, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                key={h.word}
+                className="headline-sticker"
+                style={{ ["--sticker" as string]: h.color }}
+                initial={{ scale: 1.8, opacity: 0, rotate: h.tilt * 4 }}
+                animate={{ scale: 1, opacity: 1, rotate: h.tilt }}
+                transition={{ delay: 0.25 + i * 0.16, type: "spring", stiffness: 520, damping: 17 }}
+                whileHover={{ rotate: -h.tilt, scale: 1.04 }}
               >
-                {line}
+                {h.word}
               </motion.span>
             ))}
           </h1>
-          <motion.p
-            className="landing-sub"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-          >
-            A fast, funny drawing party for you and your people. No signup. No app. Just a room code and
-            questionable art.
-          </motion.p>
+          <p className="landing-sub">
+            One person draws, everyone else races to guess. Share a 4-letter code and your friends are in — no
+            downloads, no accounts.
+          </p>
 
-          <div className="landing-cta-area">
-            <AnimatePresence mode="wait">
-              {mode === "closed" ? (
-                <motion.div
-                  key="ctas"
-                  className="cta-row"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ delay: 0.55, duration: 0.4 }}
-                >
-                  <Button variant="primary" size="lg" onClick={() => setMode("create")}>
-                    Create a Room
-                  </Button>
-                  <Button variant="secondary" size="lg" onClick={() => setMode("join")}>
-                    Join a Room
-                  </Button>
-                </motion.div>
-              ) : (
-                <motion.form
-                  key="form"
-                  className="entry-panel"
-                  onSubmit={submit}
-                  initial={{ opacity: 0, y: 16, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.98 }}
-                  transition={{ type: "spring", stiffness: 340, damping: 28 }}
-                >
-                  <label className="entry-label" htmlFor="nickname">
-                    {mode === "create" ? "What should we call you?" : "What's your name?"}
-                  </label>
-                  <input
-                    id="nickname"
-                    className="entry-input"
-                    placeholder="Nickname"
-                    maxLength={16}
-                    autoFocus
-                    value={nickname}
-                    onChange={(e) => setNickname(e.target.value)}
-                  />
-                  {mode === "join" && (
-                    <>
-                      <label className="entry-label" htmlFor="code">
-                        Room code
-                      </label>
-                      <input
-                        id="code"
-                        className="entry-input entry-input-code"
-                        placeholder="X7KP"
-                        maxLength={4}
-                        value={code}
-                        onChange={(e) => setCode(e.target.value.toUpperCase())}
-                      />
-                    </>
-                  )}
-                  {error && <p className="entry-error">{error}</p>}
-                  <div className="entry-actions">
-                    <Button type="button" variant="ghost" onClick={() => setMode("closed")}>
-                      Back
-                    </Button>
-                    <Button type="submit" variant={mode === "create" ? "primary" : "accent2"} disabled={pending}>
-                      {pending ? "..." : mode === "create" ? "Let's go" : "Join"}
-                    </Button>
-                  </div>
-                </motion.form>
-              )}
-            </AnimatePresence>
+          <div className="landing-cta">
+            <Button variant="primary" size="lg" display onClick={create} disabled={pending}>
+              {pending ? "Opening…" : "Create a room"}
+            </Button>
+            <form className="join-inline" onSubmit={join}>
+              <label className="join-label hand" htmlFor="code">
+                got a code?
+              </label>
+              <div className="join-row">
+                <input
+                  id="code"
+                  className="join-code"
+                  placeholder="ABCD"
+                  maxLength={4}
+                  value={code}
+                  autoComplete="off"
+                  spellCheck={false}
+                  onChange={(e) => {
+                    setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""));
+                    setError(null);
+                  }}
+                />
+                <Button type="submit" variant="accent2" disabled={pending || code.length < 4}>
+                  Join →
+                </Button>
+              </div>
+            </form>
           </div>
-        </div>
+          {error && <p className="entry-error landing-error">{error}</p>}
+        </section>
 
-        <motion.div
-          className="landing-scene"
-          initial={{ opacity: 0, scale: 0.92, rotate: 4 }}
-          animate={{ opacity: 1, scale: 1, rotate: 1.4 }}
-          transition={{ delay: 0.3, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <HeroScene />
-        </motion.div>
+        <aside className="landing-side">
+          <ProfileCard nameError={nameError} onNameEnter={create} />
+          <StickerBook />
+        </aside>
       </main>
 
-      <footer className="landing-footer">
-        <span>Works great on Discord calls, group chats, and couches.</span>
-      </footer>
+      <section className="how" aria-label="How a round works">
+        {STEPS.map((s, i) => (
+          <motion.div
+            key={s.title}
+            className="how-step"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.1, type: "spring", stiffness: 300, damping: 24 }}
+          >
+            <span className="how-num">{i + 1}</span>
+            <span className="how-emoji" aria-hidden>
+              {s.emoji}
+            </span>
+            <h3>{s.title}</h3>
+            <p>{s.body}</p>
+          </motion.div>
+        ))}
+      </section>
+
+      <div className="ticker" aria-hidden>
+        <div className="ticker-track">
+          {[...TICKER, ...TICKER].map((w, i) => (
+            <span key={i} className="ticker-word" style={{ color: TICKER_COLORS[i % TICKER_COLORS.length] }}>
+              {w}
+              <span className="ticker-star">✦</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <footer className="landing-footer hand">made for discord calls, group chats &amp; crowded couches</footer>
     </div>
   );
 }

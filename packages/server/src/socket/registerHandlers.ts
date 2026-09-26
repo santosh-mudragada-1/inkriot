@@ -13,9 +13,9 @@ type IOSocket = Socket<ClientToServerEvents, ServerToClientEvents, Record<string
 
 export function registerHandlers(io: IOServer, manager: RoomManager) {
   io.on("connection", (socket: IOSocket) => {
-    socket.on("create_room", ({ nickname }, cb) => {
+    socket.on("create_room", ({ nickname, avatar }, cb) => {
       const room = manager.createRoom();
-      const result = room.addPlayer(nickname, socket.id);
+      const result = room.addPlayer(nickname, socket.id, avatar);
       if ("error" in result) return cb({ ok: false, error: result.error });
       socket.data.roomCode = room.code;
       socket.data.playerId = result.playerId;
@@ -24,7 +24,7 @@ export function registerHandlers(io: IOServer, manager: RoomManager) {
       room.broadcastState();
     });
 
-    socket.on("join_room", ({ code, nickname, sessionId }, cb) => {
+    socket.on("join_room", ({ code, nickname, avatar, sessionId }, cb) => {
       const room = manager.getRoom(code);
       if (!room) return cb({ ok: false, error: "Room not found. Check the code and try again." });
 
@@ -41,7 +41,7 @@ export function registerHandlers(io: IOServer, manager: RoomManager) {
         }
       }
 
-      const result = room.addPlayer(nickname, socket.id);
+      const result = room.addPlayer(nickname, socket.id, avatar);
       if ("error" in result) return cb({ ok: false, error: result.error });
       socket.data.roomCode = room.code;
       socket.data.playerId = result.playerId;

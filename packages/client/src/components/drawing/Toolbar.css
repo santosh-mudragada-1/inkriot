@@ -2,49 +2,29 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-3);
   flex-wrap: wrap;
-  background: var(--color-paper);
-  border: 2.5px solid var(--color-ink);
-  border-radius: var(--radius-pill);
-  padding: 10px 20px;
+  justify-content: center;
+  background: var(--color-bg-raised);
+  border: var(--stroke) solid var(--color-ink);
+  border-radius: var(--radius-lg);
+  padding: 8px 14px;
   box-shadow: 5px 5px 0 var(--color-ink);
-  overflow: hidden;
-}
-
-/* faint confetti-dot pattern, kept subtle so it never competes with the controls */
-.toolbar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.5;
-  background-image:
-    radial-gradient(circle, var(--color-accent) 1.6px, transparent 1.6px),
-    radial-gradient(circle, var(--color-sky) 1.6px, transparent 1.6px),
-    radial-gradient(circle, var(--color-yellow) 1.6px, transparent 1.6px),
-    radial-gradient(circle, var(--color-pink) 1.6px, transparent 1.6px);
-  background-size: 46px 46px;
-  background-position:
-    0 0,
-    23px 12px,
-    12px 30px,
-    34px 34px;
 }
 
 .toolbar-group {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .toolbar-divider {
-  position: relative;
-  width: 2px;
+  width: 3px;
   align-self: stretch;
-  margin: 2px 0;
+  margin: 4px 0;
   background: repeating-linear-gradient(180deg, var(--color-line-strong) 0 5px, transparent 5px 10px);
+  border-radius: 2px;
 }
 
 .tool-chip {
@@ -53,94 +33,137 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  width: 56px;
+  gap: 1px;
+  width: 54px;
   height: 52px;
-  border-radius: 18px;
-  border: 2px solid transparent;
+  border-radius: 16px;
+  border: var(--stroke) solid transparent;
   background: transparent;
   color: var(--color-ink);
   cursor: pointer;
+}
+
+.tool-chip:hover {
+  background: color-mix(in srgb, var(--tool-accent) 18%, white);
 }
 
 .tool-chip-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
 }
 
 .tool-chip-label {
-  font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.01em;
+  font-size: 11px;
+  font-weight: 900;
 }
 
 .tool-chip.active {
   border-color: var(--color-ink);
-  background: color-mix(in srgb, var(--tool-accent) 30%, white);
-  box-shadow: 2px 2px 0 var(--color-ink);
+  background: var(--tool-accent);
+  color: var(--color-ink);
+  box-shadow: 3px 3px 0 var(--color-ink);
+  rotate: -3deg;
 }
 
 .tool-chip.is-action {
   width: 46px;
   height: 46px;
   border-radius: 50%;
+  border-color: var(--color-ink);
+  background: var(--color-paper);
 }
-
 .tool-chip.is-action:hover {
-  background: color-mix(in srgb, var(--tool-accent) 25%, white);
+  background: var(--tool-accent);
+}
+.tool-chip.is-danger:hover {
+  color: #fff;
 }
 
-.tool-chip.is-danger:hover {
-  color: var(--color-danger);
+/* sizes */
+.size-chip {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 2.5px solid transparent;
+  background: transparent;
+  cursor: pointer;
+}
+.size-chip:hover {
+  background: var(--color-paper);
+}
+.size-chip.active {
+  border-color: var(--color-ink);
+  background: var(--color-sun);
+}
+.size-dot {
+  display: block;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-ink);
+}
+
+/* palette */
+.toolbar-palette {
+  display: grid;
+  grid-template-columns: repeat(10, 22px);
+  gap: 5px;
 }
 
 .swatch {
-  width: 26px;
-  height: 26px;
-  border-radius: 60% 40% 55% 45% / 50% 55% 45% 50%;
-  border: 2.2px solid var(--color-ink);
-  cursor: pointer;
   position: relative;
-  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.12), inset 2px 2px 0 rgba(255, 255, 255, 0.35);
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  border: 2.5px solid var(--color-ink);
+  cursor: pointer;
+  padding: 0;
+  box-shadow: inset -2px -3px 0 rgba(0, 0, 0, 0.14), inset 2px 2px 0 rgba(255, 255, 255, 0.35);
 }
 
 .swatch.active {
-  box-shadow: 0 0 0 3px var(--color-bg-raised), 0 0 0 5px var(--color-ink);
-  transform: translateY(-2px) rotate(-4deg);
-}
-
-.toolbar-palette {
-  flex-wrap: wrap;
-  max-width: 340px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2.5px var(--color-bg-raised), 0 0 0 5px var(--color-ink);
+  transform: scale(1.12);
+  z-index: 1;
 }
 
 @media (max-width: 720px) {
   .toolbar {
     gap: var(--space-2);
-    padding: 8px 12px;
-    justify-content: center;
+    padding: 6px 8px;
+    border-radius: var(--radius-md);
+  }
+  .toolbar-divider {
+    display: none;
   }
   .tool-chip {
-    width: 48px;
-    height: 46px;
+    width: 46px;
+    height: 44px;
   }
-  .tool-chip-icon {
-    width: 24px;
-    height: 24px;
+  .tool-chip-label {
+    display: none;
   }
   .tool-chip.is-action {
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
   }
-  .swatch {
-    width: 22px;
-    height: 22px;
+  .size-chip {
+    width: 32px;
+    height: 32px;
   }
   .toolbar-palette {
-    max-width: 220px;
+    grid-template-columns: repeat(10, 24px);
+    gap: 4px;
+    order: 5;
+    width: 100%;
+    justify-content: center;
+  }
+  .swatch {
+    width: 24px;
+    height: 24px;
   }
 }

@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import { nanoid } from "nanoid";
 import {
   AVATAR_COLORS,
+  AVATAR_PATTERN,
   ClientToServerEvents,
   DEFAULT_DRAW_SECONDS,
   DEFAULT_MAX_PLAYERS,
@@ -18,7 +19,9 @@ import {
   MAX_NICKNAME_LENGTH,
   MAX_PLAYERS_PER_ROOM,
   MIN_PLAYERS_PER_ROOM,
+  LOBBY_WALL_MAX_OPS,
   Player,
+  REACTIONS,
   RECONNECT_GRACE_MS,
   ROUNDS_OPTIONS,
   ROUND_REVEAL_SECONDS,
@@ -100,7 +103,7 @@ export class Room {
     return AVATAR_COLORS.find((c) => !used.has(c)) ?? AVATAR_COLORS[this.players.size % AVATAR_COLORS.length];
   }
 
-  addPlayer(nickname: string, socketId: string): { playerId: string; sessionId: string } | { error: string } {
+  addPlayer(nickname: string, socketId: string, avatar?: string): { playerId: string; sessionId: string } | { error: string } {
     this.touch();
     if (this.players.size >= this.maxPlayers) return { error: "Room is full." };
     if (this.phase !== "LOBBY") return { error: "Game already in progress." };
@@ -120,6 +123,7 @@ export class Room {
       id: playerId,
       name: finalName,
       color: this.nextColor(),
+      avatar: typeof avatar === "string" && AVATAR_PATTERN.test(avatar) ? avatar : "",
       score: 0,
       isHost,
       connected: true,
@@ -314,6 +318,7 @@ export class Room {
   }
 
   handleDrawOp(playerId: string, op: DrawOp) {
+    if (this.phase === "LOBBY") return this.handleLobbyWallOp(playerId, op);
     if (playerId !== this.artistId || this.phase !== "DRAWING") return;
     this.touch();
     if (op.type === "clear") {
@@ -324,6 +329,25 @@ export class Room {
     }
     const stats = this.turnStats[this.turnStats.length - 1];
     if (stats && (op.type === "start" || op.type === "fill")) stats.drawOpCount++;
+    for (const p of this.players.values()) {
+      if (p.id !== playerId && p.socketId) this.io.to(p.socketId).emit("draw_op", op);
+    }
+  }
+
+  /**
+   * In the lobby everyone shares one doodle wall. Strokes only (no fill/clear) so one
+   * player can't wipe everyone else's art; the host gets a clear via `clearLobbyWall`.
+   */
+  private handleLobbyWallOp(playerId: string, op: DrawOp) {
+    if (op.type === "fill") return;
+    if (op.type === "clear") {
+      if (!this.isHost(playerId)) return;
+      this.canvasOps = [];
+    } else {
+      this.canvasOps.push(op);
+      if (this.canvasOps.length > LOBBY_WALL_MAX_OPS) this.canvasOps.shift();
+    }
+    this.touch();
     for (const p of this.players.values()) {
       if (p.id !== playerId && p.socketId) this.io.to(p.socketId).emit("draw_op", op);
     }
@@ -415,7 +439,7 @@ export class Room {
 
   sendReaction(playerId: string, emoji: string) {
     const player = this.players.get(playerId);
-    if (!player) return;
+    if (!player || !(REACTIONS as readonly string[]).includes(emoji)) return;
     this.io.to(this.code).emit("reaction", { id: nanoid(6), playerId, emoji, createdAt: Date.now() });
   }
 
@@ -471,17 +495,20 @@ export class Room {
         title: "Most Chaotic Drawing",
         playerId: chaos.artistId,
         playerName: nameOf(chaos.artistId),
-        detail: `${chaos.drawOpCount} strokes of pure chaos`,
+        detail: `${chaos.drawOpCount} stroke${chaos.drawOpCount === 1 ? "" : "s"} of pure chaos`,
       });
     }
 
-    const worst = [...this.turnStats].filter((s) => s.drawOpCount > 0).sort((a, b) => a.correctGuesserCount - b.correctGuesserCount)[0];
-    if (worst) {
+    const drawn = this.turnStats.filter((s) => s.drawOpCount > 0);
+    const worst = [...drawn].sort((a, b) => a.correctGuesserCount - b.correctGuesserCount)[0];
+    const best = Math.max(0, ...drawn.map((s) => s.correctGuesserCount));
+    // Only crown a "worst" artist if their drawing actually did worse than someone else's.
+    if (worst && (worst.correctGuesserCount === 0 || worst.correctGuesserCount < best)) {
       awards.push({
         title: "Worst Artist",
         playerId: worst.artistId,
         playerName: nameOf(worst.artistId),
-        detail: worst.correctGuesserCount === 0 ? "Nobody guessed it. Nobody." : `Only ${worst.correctGuesserCount} correct guess(es)`,
+        detail: worst.correctGuesserCount === 0 ? "Nobody guessed it. Nobody." : `Only ${worst.correctGuesserCount} correct guess${worst.correctGuesserCount === 1 ? "" : "es"}`,
       });
     }
 

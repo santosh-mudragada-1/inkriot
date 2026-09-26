@@ -1,26 +1,38 @@
-.sound-toggle {
+.sound-dock {
   position: fixed;
   top: var(--space-4);
   right: var(--space-4);
   z-index: 500;
+  display: flex;
+  gap: 8px;
+}
+
+.sound-toggle {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  border: 2px solid var(--color-ink);
+  border: var(--stroke) solid var(--color-ink);
   background: var(--color-bg-raised);
-  font-size: 18px;
+  color: var(--color-ink-faint);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   box-shadow: var(--shadow-card);
 }
+.sound-toggle.is-on {
+  color: var(--color-ink);
+  background: var(--color-sun);
+}
 
 @media (max-width: 640px) {
-  .sound-toggle {
+  .sound-dock {
     top: var(--space-3);
     right: var(--space-3);
-    width: 38px;
-    height: 38px;
+    gap: 6px;
+  }
+  .sound-toggle {
+    width: 36px;
+    height: 36px;
   }
 }

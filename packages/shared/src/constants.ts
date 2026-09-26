@@ -36,15 +36,21 @@ export const MAX_CHAT_HISTORY = 60;
 export const ROOM_IDLE_EXPIRY_MS = 1000 * 60 * 30;
 export const RECONNECT_GRACE_MS = 1000 * 45;
 
+/** Name colors in chat/feeds — all dark enough to read on white paper. */
 export const AVATAR_COLORS = [
-  "#FF4D1A",
-  "#D8FF3E",
-  "#3E7BFF",
-  "#FF3EA5",
-  "#3EFFD8",
-  "#FFB23E",
-  "#8A3EFF",
-  "#3EFF6B",
+  "#E0401F",
+  "#6A4BF0",
+  "#0E86D4",
+  "#D12F87",
+  "#0F9468",
+  "#C9680F",
+  "#9B2FD6",
+  "#B8860B",
 ] as const;
 
-export const REACTIONS = ["😂", "🔥", "💀", "👏", "😭", "WHAT?!"] as const;
+export const REACTIONS = ["😂", "🔥", "💀", "👏", "😭", "🤯", "🎨", "👀"] as const;
+
+/** Avatar strings are five dash-separated small integers; anything else is dropped server-side. */
+export const AVATAR_PATTERN = /^\d{1,2}(-\d{1,2}){4}$/;
+/** Max ops kept for the lobby doodle wall so late joiners get a bounded replay. */
+export const LOBBY_WALL_MAX_OPS = 4000;

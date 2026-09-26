@@ -1,33 +1,30 @@
 .player-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   background: var(--color-bg-raised);
-  border: 2px solid var(--color-ink);
-  border-radius: var(--radius-md);
-  padding: var(--space-4) var(--space-3);
-  width: 128px;
-  box-shadow: var(--shadow-card);
+  border: var(--stroke) solid var(--color-ink);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  width: 132px;
+  box-shadow: 0 0 0 5px var(--color-bg-raised), 5px 7px 0 5px rgba(27, 19, 64, 0.18);
 }
 
-.player-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  border: 2px solid var(--color-ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 22px;
-  color: var(--color-ink);
+.player-card.is-self {
+  background: var(--color-sun);
+}
+
+.player-avatar-wrap {
+  height: 92px;
+  display: grid;
+  place-items: end center;
 }
 
 .player-name {
-  font-weight: 700;
-  font-size: 14px;
+  font-family: var(--font-display);
+  font-size: 18px;
   text-align: center;
   max-width: 100%;
   overflow: hidden;
@@ -40,25 +37,32 @@
   gap: 4px;
   flex-wrap: wrap;
   justify-content: center;
+  min-height: 20px;
 }
 
 .tag {
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 1px 8px;
   border-radius: var(--radius-pill);
-  border: 1px solid var(--color-ink);
+  border: 2px solid var(--color-ink);
 }
-
 .tag-host {
-  background: var(--color-secondary);
-}
-.tag-you {
-  background: var(--color-bg);
+  background: var(--color-bg-raised);
 }
 .tag-away {
   background: transparent;
-  color: var(--color-ink-faint);
-  border-color: var(--color-line-strong);
+  color: var(--color-ink-soft);
+  border-style: dashed;
+}
+
+.player-you {
+  position: absolute;
+  bottom: -26px;
+  left: 50%;
+  translate: -50% 0;
+  font-size: 19px;
+  color: var(--color-grape);
+  white-space: nowrap;
+  rotate: -4deg;
 }

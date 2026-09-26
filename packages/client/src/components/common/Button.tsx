@@ -3,22 +3,24 @@ import { motion, type HTMLMotionProps } from "framer-motion";
 import { audio } from "../../lib/audio/AudioManager";
 import "./Button.css";
 
-type Variant = "primary" | "secondary" | "ghost" | "accent2";
+type Variant = "primary" | "secondary" | "ghost" | "accent2" | "grape" | "mint";
 type Size = "md" | "lg";
 
 interface ButtonProps extends Omit<HTMLMotionProps<"button">, "ref"> {
   variant?: Variant;
   size?: Size;
+  /** Set the label in the chunky display face (big CTAs only). */
+  display?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = "primary", size = "md", className = "", onClick, onMouseEnter, children, ...props }, ref) => {
+  ({ variant = "primary", size = "md", display = false, className = "", onClick, onMouseEnter, children, ...props }, ref) => {
     return (
       <motion.button
         ref={ref}
-        className={`btn btn-${variant} btn-${size} ${className}`}
+        className={`btn btn-${variant} btn-${size} ${display ? "btn-display" : ""} ${className}`}
         whileTap={{ scale: 0.96, transition: { duration: 0.08 } }}
-        whileHover={{ scale: 1.03, transition: { duration: 0.14, ease: "easeOut" } }}
+        whileHover={{ scale: 1.04, rotate: -1.2, transition: { type: "spring", stiffness: 500, damping: 15 } }}
         onMouseEnter={(e) => {
           audio.playHover();
           onMouseEnter?.(e);

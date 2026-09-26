@@ -1,0 +1,39 @@
+.combo-layer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: 45; /* above the round-reveal overlay: the last guess often ends the round */
+}
+
+.combo-stamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 26px 14px;
+  background: var(--stamp);
+  border: 4px solid var(--color-ink);
+  border-radius: 22px;
+  box-shadow: 0 0 0 6px #fff, 10px 12px 0 6px rgba(27, 19, 64, 0.25);
+  line-height: 1;
+}
+
+.combo-headline {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 5vw, 52px);
+  color: var(--color-ink);
+}
+
+.combo-points {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 7vw, 76px);
+  color: #fff;
+  -webkit-text-stroke: 3px var(--color-ink);
+  paint-order: stroke fill;
+}
+
+.combo-sub {
+  font-size: 24px;
+  margin-top: 2px;
+}

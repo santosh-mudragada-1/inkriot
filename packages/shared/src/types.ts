@@ -19,6 +19,8 @@ export interface Player {
   id: string;
   name: string;
   color: string;
+  /** Encoded doodle-avatar config ("body-eyes-mouth-hat-color"), chosen client-side. */
+  avatar: string;
   score: number;
   isHost: boolean;
   connected: boolean;
@@ -126,10 +128,12 @@ export interface RoomSnapshot {
 
 export interface CreateRoomPayload {
   nickname: string;
+  avatar?: string;
 }
 export interface JoinRoomPayload {
   code: string;
   nickname: string;
+  avatar?: string;
   sessionId?: string;
 }
 export interface JoinRoomResult {

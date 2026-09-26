@@ -31,8 +31,8 @@ export function GameSettingsPanel() {
       <PaperDoodles />
 
       <div className="settings-panel-inner">
-        <h2 className="settings-heading">Set up your game</h2>
-        <p className="settings-subheading">Make a few choices and get drawing.</p>
+        <h2 className="settings-heading">House rules</h2>
+        <p className="settings-subheading hand">you're the host — tweak these, then hit start</p>
 
         <div className="settings-card">
           <PlayfulSelect
@@ -73,9 +73,10 @@ export function GameSettingsPanel() {
         </div>
 
         <div className="settings-cta">
-          <Button variant="primary" size="lg" onClick={() => socket.emit("start_game")}>
-            Start Game →
+          <Button variant="primary" size="lg" display onClick={() => socket.emit("start_game")}>
+            {room.players.length < 2 ? "Start solo practice" : "Start the game!"}
           </Button>
+          {room.players.length < 2 && <p className="settings-solo hand">it's way more fun with friends — send them the invite link</p>}
         </div>
       </div>
     </motion.div>
