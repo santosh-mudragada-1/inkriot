@@ -5,7 +5,11 @@ export const ROOM_CODE_LENGTH = 4;
 /** Always exactly this many word cards are offered; only their max length is configurable. */
 export const WORD_CHOICE_COUNT = 3;
 export const WORD_SELECTION_SECONDS = 12;
-export const ROUND_REVEAL_SECONDS = 4;
+export const ROUND_REVEAL_SECONDS = 5;
+/** The "3, 2, 1, GO!" before each drawing turn; the draw clock starts after it. */
+export const DRAW_COUNTDOWN_MS = 3400;
+/** Words a room remembers across rematches so regulars don't see repeats. */
+export const RECENT_WORDS_MEMORY = 450;
 export const SCOREBOARD_SECONDS = 6;
 export const POST_GAME_SECONDS = 30;
 

@@ -26,7 +26,7 @@ export function RoundRevealOverlay() {
           className="reveal-word"
           initial={{ scale: 3, rotate: -20, opacity: 0 }}
           animate={{ scale: 1, rotate: -4, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 600, damping: 16, delay: 0.1 }}
+          transition={{ type: "spring", stiffness: 320, damping: 13, delay: 0.25 }}
         >
           {room.revealedWord}
         </motion.h2>
@@ -35,7 +35,7 @@ export function RoundRevealOverlay() {
             <DoodleAvatar avatar={avatarFor(artist)} seed={artist.id} size={30} crop="bust" /> drawn by <b>{artist.id === selfId ? "you" : artist.name}</b>
           </p>
         )}
-        <motion.p className={`reveal-verdict ${everyone ? "is-perfect" : correct.length === 0 ? "is-none" : ""}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+        <motion.p className={`reveal-verdict ${everyone ? "is-perfect" : correct.length === 0 ? "is-none" : ""}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }}>
           {verdict}
         </motion.p>
         {correct.length > 0 && (
@@ -46,7 +46,7 @@ export function RoundRevealOverlay() {
                 className={`reveal-chip ${p.id === selfId ? "is-self" : ""}`}
                 initial={{ opacity: 0, scale: 0.4, rotate: 10 }}
                 animate={{ opacity: 1, scale: 1, rotate: i % 2 ? 2 : -2 }}
-                transition={{ delay: 0.5 + i * 0.08, type: "spring", stiffness: 500, damping: 18 }}
+                transition={{ delay: 1.1 + i * 0.18, type: "spring", stiffness: 360, damping: 15 }}
               >
                 <span className="reveal-place">{i === 0 ? "1st" : i === 1 ? "2nd" : i === 2 ? "3rd" : `${i + 1}th`}</span>
                 <DoodleAvatar avatar={avatarFor(p)} seed={p.id} size={26} crop="bust" />

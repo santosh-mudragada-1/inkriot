@@ -109,7 +109,7 @@ export interface ClearOp {
 
 export type DrawOp = StrokeStartOp | StrokePointOp | StrokeEndOp | FillOp | ClearOp;
 
-/** State broadcast to every client; `word` is masked unless you are the artist or the round has ended. */
+/** State broadcast to every client; `word` is masked unless you are the artist, already guessed it, or the round has ended. */
 export interface RoomSnapshot {
   code: string;
   phase: GamePhase;
@@ -122,6 +122,8 @@ export interface RoomSnapshot {
   revealedWord: string | null;
   wordChoices: string[] | null;
   phaseEndsAt: number | null;
+  /** During DRAWING: when the pre-draw countdown ends and the pen goes live. */
+  drawStartsAt: number | null;
   drawSeconds: number;
   guesses: GuessMessage[];
   awards: EndGameAward[] | null;

@@ -51,7 +51,7 @@ export function ComboStamp() {
       color = combo >= 4 ? "var(--color-tomato)" : "var(--color-gum)";
     }
     setStamp({ id: latest.id, amount: latest.amount, headline, sub, color });
-    const t = window.setTimeout(() => setStamp(null), 1500);
+    const t = window.setTimeout(() => setStamp(null), 2400);
     return () => window.clearTimeout(t);
     // only re-run for a new popup id
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -67,8 +67,8 @@ export function ComboStamp() {
             style={{ ["--stamp" as string]: stamp.color }}
             initial={{ scale: 2.6, rotate: -18, opacity: 0 }}
             animate={{ scale: 1, rotate: -6, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0, y: -40 }}
-            transition={{ type: "spring", stiffness: 700, damping: 20 }}
+            exit={{ scale: 0.8, opacity: 0, y: -40, transition: { duration: 0.45 } }}
+            transition={{ type: "spring", stiffness: 380, damping: 13 }}
           >
             <span className="combo-headline">{stamp.headline}</span>
             <span className="combo-points">+{stamp.amount}</span>

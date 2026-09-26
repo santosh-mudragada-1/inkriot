@@ -13,6 +13,7 @@ import { Button } from "../common/Button";
 import { DoodleAvatar } from "../common/DoodleAvatar";
 import { Logo } from "../common/Logo";
 import { XpBar } from "../profile/ProfileCard";
+import { MemorySheet } from "./MemorySheet";
 import "./EndScreen.css";
 
 const PODIUM_ORDER = [1, 0, 2]; // 2nd, 1st, 3rd left-to-right
@@ -224,8 +225,9 @@ export default function EndScreen() {
       {gallery.length > 0 && (
         <section className="gallery" aria-labelledby="gallery-title">
           <h2 id="gallery-title">
-            Tonight's gallery <span className="hand">— tap a drawing to save it</span>
+            Tonight's gallery <span className="hand">— tap a drawing to save just that one</span>
           </h2>
+          <MemorySheet gallery={gallery} players={room.players} roomCode={room.code} />
           <div className="gallery-grid">
             {gallery.map((g, i) => (
               <motion.a

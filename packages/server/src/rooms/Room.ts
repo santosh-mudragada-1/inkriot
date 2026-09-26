@@ -5,6 +5,7 @@ import {
   AVATAR_PATTERN,
   ClientToServerEvents,
   DEFAULT_DRAW_SECONDS,
+  DRAW_COUNTDOWN_MS,
   DEFAULT_GAME_MODE,
   DEFAULT_PROMPT_LENGTH,
   DEFAULT_MAX_PLAYERS,
@@ -32,9 +33,11 @@ import {
   ServerToClientEvents,
   WORD_CHOICE_COUNT,
   PROMPT_LENGTH_OPTIONS,
+  RECENT_WORDS_MEMORY,
   WORD_SELECTION_SECONDS,
   artistPoints,
   buildHintPattern,
+  chooseHintIndices,
   guesserPoints,
   hintTargetCount,
   isCloseGuess,
@@ -76,9 +79,12 @@ export class Room {
   currentWord: string | null = null;
   wordChoices: string[] | null = null;
   usedWords = new Set<string>();
+  /** Survives rematches, so a room of regulars doesn't keep drawing the same prompts. */
+  private recentWords: string[] = [];
   canvasOps: DrawOp[] = [];
   guesses: GuessMessage[] = [];
   phaseEndsAt: number | null = null;
+  drawStartsAt: number | null = null;
   awards: EndGameAward[] | null = null;
   lastActivityAt = Date.now();
 
@@ -182,6 +188,7 @@ export class Room {
 
     if (this.players.size === 0) {
       this.clearPhaseTimer();
+      this.clearHintTimers();
       this.onEmpty();
       return;
     }
@@ -273,7 +280,8 @@ export class Room {
 
     this.artistId = artist.id;
     this.currentWord = null;
-    this.wordChoices = pickRandomWords(WORD_CHOICE_COUNT, this.usedWords, this.gameMode, this.maxPromptWords);
+    const seen = new Set([...this.usedWords, ...this.recentWords]);
+    this.wordChoices = pickRandomWords(WORD_CHOICE_COUNT, seen, this.gameMode, this.maxPromptWords);
     this.canvasOps = [];
     this.guesses = [];
     for (const p of this.players.values()) {
@@ -292,31 +300,44 @@ export class Room {
     if (!this.wordChoices?.includes(word)) return;
     this.currentWord = word;
     this.usedWords.add(word);
+    this.rememberWord(word);
     this.wordChoices = null;
     this.clearPhaseTimer();
-    this.setPhase("DRAWING", this.drawSeconds * 1000, () => this.endRound());
+    // The phase covers the "3, 2, 1, GO!" plus the full draw time; the clock players
+    // see (and scoring) only starts once the countdown is over.
+    this.drawStartsAt = Date.now() + DRAW_COUNTDOWN_MS;
+    this.hintRevealedIndices.clear();
+    this.setPhase("DRAWING", DRAW_COUNTDOWN_MS + this.drawSeconds * 1000, () => this.endRound());
     this.scheduleHints();
+  }
+
+  private rememberWord(word: string) {
+    this.recentWords = this.recentWords.filter((w) => w !== word);
+    this.recentWords.push(word);
+    if (this.recentWords.length > RECENT_WORDS_MEMORY) this.recentWords.shift();
   }
 
   private scheduleHints() {
     this.clearHintTimers();
     this.hintRevealedIndices.clear();
     if (!this.currentWord) return;
-    const indices = letterIndices(this.currentWord);
-    if (indices.length < 3) return; // too short to bother hinting
+    const word = this.currentWord;
+    const total = letterIndices(word).length;
 
     const drawMs = this.drawSeconds * 1000;
-    const reveal = (fraction: number) => {
-      const target = hintTargetCount(indices.length, fraction);
-      const hidden = indices.filter((i) => !this.hintRevealedIndices.has(i));
-      shuffleInPlace(hidden);
-      const need = target - this.hintRevealedIndices.size;
-      for (let k = 0; k < need && k < hidden.length; k++) this.hintRevealedIndices.add(hidden[k]);
+    const reveal = (stage: 1 | 2) => {
+      // Guard against a stale timer firing into a different turn.
+      if (this.phase !== "DRAWING" || this.currentWord !== word) return;
+      const need = hintTargetCount(total, stage) - this.hintRevealedIndices.size;
+      if (need <= 0) return;
+      for (const i of chooseHintIndices(word, this.hintRevealedIndices, need)) this.hintRevealedIndices.add(i);
       this.broadcastState();
     };
 
-    this.hintTimers.push(setTimeout(() => reveal(0.3), drawMs * 0.3));
-    this.hintTimers.push(setTimeout(() => reveal(0.6), drawMs * 0.6));
+    // First hint at the halfway mark, second at three-quarters — measured from when
+    // the pen goes live, not from the countdown.
+    this.hintTimers.push(setTimeout(() => reveal(1), DRAW_COUNTDOWN_MS + drawMs * 0.5));
+    this.hintTimers.push(setTimeout(() => reveal(2), DRAW_COUNTDOWN_MS + drawMs * 0.75));
   }
 
   private clearHintTimers() {
@@ -327,6 +348,8 @@ export class Room {
   handleDrawOp(playerId: string, op: DrawOp) {
     if (this.phase === "LOBBY") return this.handleLobbyWallOp(playerId, op);
     if (playerId !== this.artistId || this.phase !== "DRAWING") return;
+    // Small tolerance for clock skew between the artist's countdown and ours.
+    if (this.drawStartsAt && Date.now() < this.drawStartsAt - 400) return;
     this.touch();
     if (op.type === "clear") {
       this.canvasOps = [];
@@ -386,10 +409,11 @@ export class Room {
     if (correct) {
       player.hasGuessedCorrectly = true;
       player.streak++;
-      const remainingMs = Math.max(0, (this.phaseEndsAt ?? Date.now()) - Date.now());
-      const points = guesserPoints(remainingMs, this.drawSeconds * 1000, player.streak);
+      const drawMs = this.drawSeconds * 1000;
+      const remainingMs = Math.min(drawMs, Math.max(0, (this.phaseEndsAt ?? Date.now()) - Date.now()));
+      const points = guesserPoints(remainingMs, drawMs, player.streak);
       player.score += points;
-      player.lastGuessMs = this.drawSeconds * 1000 - remainingMs;
+      player.lastGuessMs = drawMs - remainingMs;
 
       if (!this.fastestGuess || player.lastGuessMs < this.fastestGuess.ms) {
         this.fastestGuess = { playerId, ms: player.lastGuessMs };
@@ -453,6 +477,7 @@ export class Room {
   private endRound() {
     if (this.phase === "ROUND_REVEAL" || this.phase === "SCOREBOARD") return;
     this.clearHintTimers();
+    this.drawStartsAt = null;
     const artist = this.artistId ? this.players.get(this.artistId) : null;
     const stats = this.turnStats[this.turnStats.length - 1];
     if (artist && stats) {
@@ -474,6 +499,8 @@ export class Room {
 
   private endGame() {
     this.clearPhaseTimer();
+    this.clearHintTimers();
+    this.drawStartsAt = null;
     this.artistId = null;
     this.currentWord = null;
     this.wordChoices = null;
@@ -558,6 +585,8 @@ export class Room {
     if (!this.isHost(playerId)) return;
     this.clearPhaseTimer();
     this.clearHintTimers();
+    this.hintRevealedIndices.clear();
+    this.drawStartsAt = null;
     this.phase = "LOBBY";
     this.round = 0;
     this.turnIndex = -1;
@@ -601,6 +630,7 @@ export class Room {
 
   getSnapshot(forPlayerId: string): RoomSnapshot {
     const isArtist = forPlayerId === this.artistId;
+    const solved = this.phase === "DRAWING" && !!this.players.get(forPlayerId)?.hasGuessedCorrectly;
     const revealArtist = this.phase === "ROUND_REVEAL" || this.phase === "SCOREBOARD" || this.phase === "GAME_COMPLETE";
     return {
       code: this.code,
@@ -611,9 +641,10 @@ export class Room {
       round: Math.min(this.round, this.totalRounds) || 1,
       totalRounds: this.totalRounds,
       wordLength: this.currentWord ? this.currentWord.replace(/ /g, "").length : null,
-      revealedWord: isArtist || revealArtist ? this.currentWord : null,
+      revealedWord: isArtist || solved || revealArtist ? this.currentWord : null,
       wordChoices: isArtist ? this.wordChoices : null,
       phaseEndsAt: this.phaseEndsAt,
+      drawStartsAt: this.phase === "DRAWING" ? this.drawStartsAt : null,
       drawSeconds: this.drawSeconds,
       guesses: this.guesses,
       awards: this.awards,
@@ -638,12 +669,5 @@ export class Room {
 
   isEmpty() {
     return this.players.size === 0;
-  }
-}
-
-function shuffleInPlace<T>(arr: T[]): void {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
 }

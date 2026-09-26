@@ -7,9 +7,76 @@
   border-radius: var(--radius-lg);
 }
 
+.floating-reaction-anchor {
+  position: absolute;
+  bottom: 10%;
+  width: 0;
+  height: 0;
+}
+
 .floating-reaction {
   position: absolute;
-  bottom: 8%;
-  font-size: 40px;
+  left: 0;
+  top: 0;
+  translate: -50% -50%;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
   filter: drop-shadow(0 3px 0 rgba(27, 19, 64, 0.25));
+}
+
+.floating-reaction-name {
+  margin-top: 2px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--color-ink);
+  white-space: nowrap;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reaction-mini {
+  position: absolute;
+  left: 0;
+  top: 0;
+  translate: -50% -50%;
+  font-size: 18px;
+}
+
+.reaction-hype {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px 4px 8px;
+  background: var(--color-sun);
+  border: var(--stroke) solid var(--color-ink);
+  border-radius: var(--radius-pill);
+  box-shadow: 4px 4px 0 var(--color-ink);
+}
+
+.reaction-hype-emoji {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.reaction-hype-count {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--color-ink);
+  display: inline-block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reaction-mini {
+    display: none;
+  }
 }

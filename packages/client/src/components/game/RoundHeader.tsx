@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { wordDifficulty } from "@inkriot/shared";
+import { wordDifficulty, wordLengths } from "@inkriot/shared";
 import { useGameStore } from "../../store/useGameStore";
 import { useCountdown } from "../../hooks/useCountdown";
 import { audio } from "../../lib/audio/AudioManager";
@@ -18,7 +18,8 @@ export function RoundHeader() {
   const room = useGameStore((s) => s.room)!;
   const selfId = useGameStore((s) => s.selfId);
   const drawing = room.phase === "DRAWING";
-  const remainingMs = useCountdown(drawing ? room.phaseEndsAt : null);
+  // The DRAWING phase includes the 3-2-1 countdown; the clock sits at full time until the pen goes live.
+  const remainingMs = Math.min(room.drawSeconds * 1000, useCountdown(drawing ? room.phaseEndsAt : null));
   const seconds = Math.ceil(remainingMs / 1000);
   const lastTick = useRef<number | null>(null);
   const artist = room.players.find((p) => p.id === room.artistId);
@@ -44,8 +45,10 @@ export function RoundHeader() {
 
   const showFullWord = room.phase === "ROUND_REVEAL" && room.revealedWord;
   const showArtistWord = drawing && isArtist && room.revealedWord;
+  const showSolvedWord = drawing && !isArtist && room.revealedWord;
   const showHints = drawing && !isArtist && room.hintPattern;
-  const letters = room.hintPattern?.filter((c) => c !== " ").length ?? 0;
+  // "fire fighter" -> (4, 7): one number per word, like a crossword clue.
+  const enumeration = room.hintPattern ? `(${wordLengths(room.hintPattern).join(", ")})` : "";
 
   return (
     <header className="round-header">
@@ -67,12 +70,19 @@ export function RoundHeader() {
             <span className="rh-word-label hand">draw this:</span>
             <span className={`rh-artist-word diff-${wordDifficulty(room.revealedWord!)}`}>{room.revealedWord}</span>
           </>
+        ) : showSolvedWord ? (
+          <>
+            <span className="rh-word-label hand">you got it! ✓</span>
+            <span className="rh-artist-word rh-solved-word">
+              {room.revealedWord} <small>{enumeration}</small>
+            </span>
+          </>
         ) : showFullWord ? (
           <span className="rh-artist-word">{room.revealedWord}</span>
         ) : showHints ? (
           <>
             <span className="rh-word-label hand">
-              guess the word <b>{letters} letters</b>
+              guess the word <b>{enumeration}</b>
             </span>
             <HintWord pattern={room.hintPattern!} />
           </>

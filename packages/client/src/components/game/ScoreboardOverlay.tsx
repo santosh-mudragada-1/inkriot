@@ -37,7 +37,7 @@ export function ScoreboardOverlay() {
               className={`sb-row ${p.id === selfId ? "is-self" : ""}`}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.06 }}
+              transition={{ delay: 0.25 + i * 0.14, type: "spring", stiffness: 260, damping: 20 }}
             >
               <span className="sb-rank">{i + 1}</span>
               <span className="avatar-disc sb-avatar">
@@ -50,7 +50,7 @@ export function ScoreboardOverlay() {
                   style={{ background: BAR_COLORS[i % BAR_COLORS.length] }}
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.max(3, (p.score / maxScore) * 100)}%` }}
-                  transition={{ duration: 0.9, delay: 0.15 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 1.4, delay: 0.5 + i * 0.14, ease: [0.16, 1, 0.3, 1] }}
                 />
               </div>
               <Points value={p.score} />

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useGameStore } from "../../store/useGameStore";
 import { audio } from "../../lib/audio/AudioManager";
+import { useCountdown } from "../../hooks/useCountdown";
 import { RoundHeader } from "./RoundHeader";
 import { Canvas, type CanvasHandle } from "../drawing/Canvas";
 import { Toolbar } from "../drawing/Toolbar";
@@ -27,7 +28,9 @@ export default function GameScreen() {
 
   const isArtist = selfId === room.artistId;
   const self = room.players.find((p) => p.id === selfId);
-  const canvasActive = room.phase === "DRAWING";
+  // The pen goes live only after the shared 3-2-1 countdown.
+  const countdownLeft = useCountdown(room.phase === "DRAWING" ? room.drawStartsAt : null);
+  const canvasActive = room.phase === "DRAWING" && countdownLeft <= 0;
 
   useEffect(() => {
     audio.setMusicMood("game");
@@ -73,7 +76,7 @@ export default function GameScreen() {
               {room.phase === "SCOREBOARD" && <ScoreboardOverlay key="scoreboard" />}
             </AnimatePresence>
           </div>
-          {isArtist && canvasActive ? (
+          {isArtist && room.phase === "DRAWING" ? (
             <div className="toolbar-dock">
               <Toolbar onUndo={() => canvasRef.current?.undo()} onClear={() => canvasRef.current?.clear()} />
             </div>

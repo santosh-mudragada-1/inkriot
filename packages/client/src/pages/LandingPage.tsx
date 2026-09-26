@@ -7,6 +7,9 @@ import { ProfileCard } from "../components/profile/ProfileCard";
 import { StickerBook } from "../components/profile/StickerBook";
 import { PaperDoodles } from "../components/settings/PaperDoodles";
 import { useRoomActions } from "../hooks/useRoomActions";
+import { socket } from "../lib/socket";
+import { clearSession } from "../lib/session";
+import { useGameStore } from "../store/useGameStore";
 import { useProfile } from "../lib/profile";
 import { audio } from "../lib/audio/AudioManager";
 import "./LandingPage.css";
@@ -35,6 +38,14 @@ export default function LandingPage() {
 
   useEffect(() => {
     audio.setMusicMood("lobby");
+    // Back on the home page (logo, "back to home", or the browser back button) means
+    // we're out of whatever room we were in — tell the server so it stops sending us
+    // that game, and forget it locally so the next room starts clean.
+    if (useGameStore.getState().activeCode) {
+      if (socket.connected) socket.emit("leave_room");
+      useGameStore.getState().reset();
+      clearSession();
+    }
   }, []);
 
   const requireName = () => {

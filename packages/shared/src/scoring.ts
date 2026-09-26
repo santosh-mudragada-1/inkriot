@@ -13,19 +13,25 @@ export function artistPoints(correctGuesserCount: number): number {
 }
 
 export function normalizeGuess(text: string): string {
-  return text.trim().toLowerCase().replace(/[^a-z0-9 ]/g, "");
+  return text.trim().toLowerCase().replace(/[^a-z0-9 ]/g, "").replace(/\s+/g, " ");
+}
+
+/** Spacing-insensitive form, so "firefighter" matches "fire fighter" and "hot-dog" matches "hot dog". */
+function compact(text: string): string {
+  return normalizeGuess(text).replace(/ /g, "");
 }
 
 export function isCloseGuess(guess: string, word: string): boolean {
-  const g = normalizeGuess(guess);
-  const w = normalizeGuess(word);
+  const g = compact(guess);
+  const w = compact(word);
   if (g === w || g.length < 3) return false;
   const distance = levenshtein(g, w);
   return distance > 0 && distance <= Math.max(1, Math.floor(w.length * 0.25));
 }
 
 export function isCorrectGuess(guess: string, word: string): boolean {
-  return normalizeGuess(guess) === normalizeGuess(word);
+  const g = compact(guess);
+  return g.length > 0 && g === compact(word);
 }
 
 function levenshtein(a: string, b: string): number {

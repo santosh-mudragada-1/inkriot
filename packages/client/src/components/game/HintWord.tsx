@@ -13,9 +13,9 @@ export function HintWord({ pattern }: { pattern: (string | null)[] }) {
                 <motion.span
                   key="letter"
                   className="hint-letter"
-                  initial={{ opacity: 0, y: -14, scale: 0.4, rotate: -10 }}
-                  animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
-                  transition={{ type: "spring", stiffness: 480, damping: 16 }}
+                  initial={{ opacity: 0, y: -22, scale: 0.3, rotate: -18 }}
+                  animate={{ opacity: 1, y: 0, scale: [0.3, 1.5, 1], rotate: 0 }}
+                  transition={{ duration: 0.9, ease: [0.34, 1.56, 0.64, 1] }}
                 >
                   {ch.toUpperCase()}
                 </motion.span>

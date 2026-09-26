@@ -33,7 +33,7 @@ export function useRoomActions() {
         }
         saveNickname(nickname);
         saveSession({ code: res.code, sessionId: res.sessionId, playerId: res.playerId, nickname });
-        useGameStore.getState().setSelfId(res.playerId);
+        useGameStore.getState().enterRoom(res.code, res.playerId);
         navigate(`/room/${res.code}`);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Something went wrong.");
@@ -57,7 +57,7 @@ export function useRoomActions() {
         }
         saveNickname(nickname);
         saveSession({ code: res.code, sessionId: res.sessionId, playerId: res.playerId, nickname });
-        useGameStore.getState().setSelfId(res.playerId);
+        useGameStore.getState().enterRoom(res.code, res.playerId);
         navigate(`/room/${res.code}`);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Something went wrong.");

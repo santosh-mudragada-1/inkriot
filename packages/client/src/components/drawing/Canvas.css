@@ -26,30 +26,64 @@
   cursor: default;
 }
 
-/* fill tool: show a real crosshair (it has no live dot) */
-.canvas-frame.is-fill .draw-canvas {
-  cursor: crosshair !important;
-}
-
+/* Live tool cursor: a size ring centred on the pointer + the tool's doodle, tip on the pointer. */
 .canvas-tool-cursor {
   position: absolute;
   top: 0;
   left: 0;
-  border-radius: 50%;
-  border: 2px solid var(--color-ink);
-  box-shadow: 0 0 0 1.5px var(--color-ink);
+  width: 0;
+  height: 0;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 100ms ease, width 100ms var(--ease-spring), height 100ms var(--ease-spring);
+  z-index: 30;
+  transition: opacity 100ms ease;
 }
 
 .canvas-tool-cursor.visible {
-  opacity: 0.95;
+  opacity: 1;
 }
 
-.canvas-tool-cursor.tool-eraser {
+.tool-cursor-ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  translate: -50% -50%;
+  border-radius: 50%;
+  border: 2px solid var(--color-ink);
+  box-shadow: 0 0 0 1.5px var(--color-ink);
+  opacity: 0.9;
+  transition: width 100ms var(--ease-spring), height 100ms var(--ease-spring);
+}
+
+.tool-eraser .tool-cursor-ring {
   border-style: dashed;
   box-shadow: none;
+}
+
+.tool-cursor-art {
+  position: absolute;
+  display: block;
+  line-height: 0;
+  transform-origin: 3px 37px;
+  scale: 1.35;
+  filter: drop-shadow(2px 3px 0 rgba(27, 19, 64, 0.2));
+  animation: tool-cursor-in 280ms var(--ease-spring);
+  transition: transform 120ms var(--ease-spring);
+}
+
+/* pressing down tilts the tool into the paper a little */
+.canvas-tool-cursor.pressing .tool-cursor-art {
+  transform: rotate(-8deg) scale(0.92);
+}
+.tool-fill.pressing .tool-cursor-art {
+  transform: rotate(-22deg);
+}
+
+@keyframes tool-cursor-in {
+  from {
+    transform: scale(0.4) rotate(25deg);
+    opacity: 0;
+  }
 }
 
 @media (hover: none) {

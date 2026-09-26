@@ -84,6 +84,15 @@
 .rh-artist-word.diff-medium {
   background: var(--color-sky);
 }
+.rh-solved-word {
+  background: var(--color-mint);
+}
+.rh-solved-word small {
+  font-family: var(--font-ui);
+  font-size: 0.5em;
+  font-weight: 900;
+  vertical-align: middle;
+}
 .rh-artist-word.diff-hard {
   background: var(--color-gum);
 }

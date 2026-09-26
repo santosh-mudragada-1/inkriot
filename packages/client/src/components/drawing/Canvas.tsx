@@ -8,6 +8,8 @@ import { subscribeCanvasHistory } from "../../lib/canvasHistoryBuffer";
 import { useGameStore } from "../../store/useGameStore";
 import { useToolStore } from "../../store/useToolStore";
 import { audio } from "../../lib/audio/AudioManager";
+import { ToolCursorArt } from "../common/CursorArt";
+import { TOOL_HOTSPOT } from "../common/cursorHotspots";
 import "./Canvas.css";
 
 export interface CanvasHandle {
@@ -190,7 +192,7 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(function Canvas({ is
     if (cursorDotRef.current) {
       const rect = containerRef.current?.getBoundingClientRect();
       if (rect) {
-        cursorDotRef.current.style.transform = `translate(${e.clientX - rect.left}px, ${e.clientY - rect.top}px) translate(-50%, -50%)`;
+        cursorDotRef.current.style.transform = `translate(${e.clientX - rect.left}px, ${e.clientY - rect.top}px)`;
         // The pointer is often already inside the canvas when the artist becomes active
         // (no fresh "enter" event fires in that case), so the first move must reveal it too.
         cursorDotRef.current.classList.add("visible");
@@ -216,7 +218,7 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(function Canvas({ is
   const color = useToolStore((s) => s.color);
   const size = useToolStore((s) => s.size);
 
-  const showLiveCursor = isArtist && active && tool !== "fill";
+  const showLiveCursor = isArtist && active;
   const cursorSize = Math.max(6, size * (canvasWidth / 800));
 
   // Position + reveal the cursor immediately on mount using the last known pointer
@@ -230,7 +232,7 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(function Canvas({ is
     const { x, y } = pointerPosition;
     const inside = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
     if (inside) {
-      el.style.transform = `translate(${x - rect.left}px, ${y - rect.top}px) translate(-50%, -50%)`;
+      el.style.transform = `translate(${x - rect.left}px, ${y - rect.top}px)`;
       el.classList.add("visible");
     }
   }, [showLiveCursor]);
@@ -241,6 +243,8 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(function Canvas({ is
       className={`canvas-frame canvas-${mode} ${isArtist && active ? "is-live" : ""} ${tool === "fill" && isArtist && active ? "is-fill" : ""}`}
       data-drawing-canvas={isArtist && active ? "" : undefined}
       onPointerEnter={() => cursorDotRef.current?.classList.add("visible")}
+      onPointerDown={() => cursorDotRef.current?.classList.add("pressing")}
+      onPointerUp={() => cursorDotRef.current?.classList.remove("pressing")}
       onPointerLeave={() => {
         cursorDotRef.current?.classList.remove("visible");
         endStroke();
@@ -255,16 +259,22 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(function Canvas({ is
         onPointerCancel={endStroke}
       />
       {showLiveCursor && (
-        <div
-          ref={cursorDotRef}
-          className={`canvas-tool-cursor tool-${tool}`}
-          style={{
-            width: cursorSize,
-            height: cursorSize,
-            background: tool === "eraser" ? "rgba(255,255,255,0.7)" : color,
-            borderColor: tool === "eraser" ? "var(--color-ink)" : color === "#FFFFFF" ? "var(--color-ink-faint)" : "rgba(255,255,255,0.9)",
-          }}
-        />
+        <div ref={cursorDotRef} className={`canvas-tool-cursor tool-${tool}`}>
+          {tool !== "fill" && (
+            <span
+              className="tool-cursor-ring"
+              style={{
+                width: cursorSize,
+                height: cursorSize,
+                background: tool === "eraser" ? "rgba(255,255,255,0.7)" : color,
+                borderColor: tool === "eraser" ? "var(--color-ink)" : color === "#FFFFFF" ? "var(--color-ink-faint)" : "rgba(255,255,255,0.9)",
+              }}
+            />
+          )}
+          <span key={tool} className="tool-cursor-art" style={{ left: -TOOL_HOTSPOT.x, top: -TOOL_HOTSPOT.y }}>
+            <ToolCursorArt tool={tool} color={color} />
+          </span>
+        </div>
       )}
     </div>
   );

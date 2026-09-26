@@ -2,22 +2,45 @@
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   pointer-events: none;
   z-index: 50;
+  background: radial-gradient(circle at center, rgba(255, 253, 247, 0.85) 0%, rgba(255, 253, 247, 0.35) 55%, transparent 75%);
+  border-radius: var(--radius-lg);
+}
+
+.draw-countdown-caption {
+  position: absolute;
+  top: 14%;
+  font-size: clamp(18px, 2.4vw, 26px);
+  color: var(--color-ink-soft);
 }
 
 .draw-countdown-step {
   font-family: var(--font-display);
   font-size: clamp(90px, 16vw, 200px);
-  color: var(--color-sun);
+  line-height: 1;
   -webkit-text-stroke: 6px var(--color-ink);
   paint-order: stroke fill;
   text-shadow: 8px 10px 0 var(--color-ink);
 }
 
 .draw-countdown-step.is-go {
-  color: var(--color-tomato);
   font-size: clamp(70px, 12vw, 150px);
+}
+
+.draw-countdown-ring {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 6px dashed var(--color-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .draw-countdown-ring {
+    display: none;
+  }
 }

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { DrawOp, GuessMessage, ReactionEvent, RoomSnapshot, ScorePopup } from "@inkriot/shared";
 import { socket } from "../lib/socket";
+import { loadSession } from "../lib/session";
 import { useGameStore } from "../store/useGameStore";
 import { audio } from "../lib/audio/AudioManager";
 import { useProgress } from "../lib/progress";
@@ -48,10 +49,24 @@ export function useSocketBridge() {
   useEffect(() => {
     const store = useGameStore.getState;
 
-    const onConnect = () => useGameStore.setState({ connected: true });
+    const onConnect = () => {
+      useGameStore.setState({ connected: true });
+      // A dropped connection (flaky wifi, phone sleep) gets a new socket id; the server
+      // won't send this tab anything until it re-claims its seat.
+      const { activeCode } = store();
+      const session = loadSession();
+      if (activeCode && session?.code === activeCode) {
+        socket.emit("rejoin_room", { code: activeCode, sessionId: session.sessionId }, (res) => {
+          if (res.ok && res.playerId) store().enterRoom(activeCode, res.playerId);
+          else store().setError("You were disconnected from the room.");
+        });
+      }
+    };
     const onDisconnect = () => useGameStore.setState({ connected: false });
 
     const onRoomState = (snapshot: RoomSnapshot) => {
+      const { activeCode } = store();
+      if (activeCode && snapshot.code !== activeCode) return; // late packet from a room we left
       const prev = store().room;
       if (prevPlayerCount.current !== null && prev?.code === snapshot.code) {
         if (snapshot.players.length > prevPlayerCount.current) audio.playJoin();
@@ -98,13 +113,13 @@ export function useSocketBridge() {
     const onScorePopup = (popup: ScorePopup) => {
       store().addScorePopup(popup);
       if (popup.playerId === store().selfId) window.setTimeout(() => audio.playCoin(), 260);
-      setTimeout(() => store().removeScorePopup(popup.id), 1600);
+      setTimeout(() => store().removeScorePopup(popup.id), 2600);
     };
 
     const onReaction = (event: ReactionEvent) => {
       store().addReaction(event);
       audio.playReaction();
-      setTimeout(() => store().removeReaction(event.id), 2200);
+      setTimeout(() => store().removeReaction(event.id), 3200);
     };
 
     // Buffer history so a canvas that mounts after the event (e.g. right after joining)

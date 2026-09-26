@@ -14,6 +14,11 @@ export function bufferCanvasHistory(ops: DrawOp[]) {
   else pending = ops;
 }
 
+/** Drop any buffered history — it belonged to a room we've left. */
+export function clearCanvasHistory() {
+  pending = null;
+}
+
 export function subscribeCanvasHistory(fn: Listener) {
   listener = fn;
   if (pending) {

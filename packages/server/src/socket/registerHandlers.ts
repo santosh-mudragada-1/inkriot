@@ -14,6 +14,7 @@ type IOSocket = Socket<ClientToServerEvents, ServerToClientEvents, Record<string
 export function registerHandlers(io: IOServer, manager: RoomManager) {
   io.on("connection", (socket: IOSocket) => {
     socket.on("create_room", ({ nickname, avatar }, cb) => {
+      leaveCurrentRoom(socket, manager);
       const room = manager.createRoom();
       const result = room.addPlayer(nickname, socket.id, avatar);
       if ("error" in result) return cb({ ok: false, error: result.error });
@@ -27,6 +28,7 @@ export function registerHandlers(io: IOServer, manager: RoomManager) {
     socket.on("join_room", ({ code, nickname, avatar, sessionId }, cb) => {
       const room = manager.getRoom(code);
       if (!room) return cb({ ok: false, error: "Room not found. Check the code and try again." });
+      leaveCurrentRoom(socket, manager, sessionId ? room.sessionToPlayer.get(sessionId) : undefined);
 
       if (sessionId) {
         const result = room.reconnectPlayer(sessionId, socket.id);
@@ -55,6 +57,7 @@ export function registerHandlers(io: IOServer, manager: RoomManager) {
     socket.on("rejoin_room", ({ code, sessionId }, cb) => {
       const room = manager.getRoom(code);
       if (!room) return cb({ ok: false, error: "Room not found." });
+      leaveCurrentRoom(socket, manager, room.sessionToPlayer.get(sessionId));
       const result = room.reconnectPlayer(sessionId, socket.id);
       if ("error" in result) return cb({ ok: false, error: result.error });
       socket.data.roomCode = room.code;
@@ -107,14 +110,7 @@ export function registerHandlers(io: IOServer, manager: RoomManager) {
       room.playAgain(socket.data.playerId);
     });
 
-    socket.on("leave_room", () => {
-      const room = currentRoom(socket, manager);
-      if (!room || !socket.data.playerId) return;
-      room.removePlayer(socket.data.playerId);
-      socket.leave(room.code);
-      socket.data.roomCode = undefined;
-      socket.data.playerId = undefined;
-    });
+    socket.on("leave_room", () => leaveCurrentRoom(socket, manager));
 
     socket.on("disconnect", () => {
       const room = currentRoom(socket, manager);
@@ -127,6 +123,23 @@ export function registerHandlers(io: IOServer, manager: RoomManager) {
 function currentRoom(socket: IOSocket, manager: RoomManager) {
   if (!socket.data.roomCode) return undefined;
   return manager.getRoom(socket.data.roomCode);
+}
+
+/**
+ * A socket belongs to at most one room. Before it creates/joins another, drop it from
+ * the old one — otherwise the old room keeps streaming its state and drawings to this
+ * socket and the client flickers between two games. `keepPlayerId` skips removal when
+ * the socket is just re-attaching to the same seat.
+ */
+function leaveCurrentRoom(socket: IOSocket, manager: RoomManager, keepPlayerId?: string) {
+  const room = currentRoom(socket, manager);
+  const playerId = socket.data.playerId;
+  if (room && playerId && playerId !== keepPlayerId) {
+    room.removePlayer(playerId);
+    socket.leave(room.code);
+  }
+  socket.data.roomCode = undefined;
+  socket.data.playerId = undefined;
 }
 
 function sendJoinExtras(socket: IOSocket, room: Room, playerId: string) {

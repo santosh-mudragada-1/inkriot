@@ -185,8 +185,20 @@ a {
   }
 }
 
-.cursor-dot,
-.cursor-ring {
+.doodle-cursor-layer {
+  display: none;
+}
+.has-custom-cursor .doodle-cursor-layer {
+  display: block;
+}
+@media (max-width: 720px), (hover: none) {
+  .has-custom-cursor .doodle-cursor-layer {
+    display: none;
+  }
+}
+
+.doodle-cursor,
+.cursor-trail {
   position: fixed;
   top: 0;
   left: 0;
@@ -195,47 +207,79 @@ a {
   will-change: transform;
 }
 
-.cursor-dot {
-  width: 6px;
-  height: 6px;
+.cursor-trail {
   border-radius: 50%;
-  background: var(--color-tomato);
-  box-shadow: 0 0 0 2px var(--color-bg-raised);
-  transition: opacity 120ms ease;
+  border: 1.5px solid var(--color-ink);
+  z-index: 9998;
+  transition: opacity 150ms ease;
 }
 
-.cursor-ring {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 2.5px solid var(--color-ink);
-  opacity: 0.4;
-  transition: width 160ms var(--ease-spring), height 160ms var(--ease-spring), opacity 160ms ease, border-color 160ms ease;
+.cursor-art {
+  position: absolute;
+  display: block;
+  line-height: 0;
+  filter: drop-shadow(1px 2px 0 rgba(27, 19, 64, 0.18));
+  transition: opacity 120ms ease, transform 200ms var(--ease-spring);
 }
-
-.cursor-dot.cursor-hover {
-  background: var(--color-grape);
+.cursor-arrow {
+  transform-origin: 5px 4px;
+  transform: rotate(-4deg);
 }
-.cursor-ring.cursor-hover {
-  width: 50px;
-  height: 50px;
-  border-color: var(--color-grape);
-  border-style: dashed;
-  opacity: 0.7;
-}
-.cursor-dot.cursor-press,
-.cursor-ring.cursor-press {
-  opacity: 0.6;
-}
-.cursor-ring.cursor-press {
-  width: 26px;
-  height: 26px;
-}
-.cursor-dot.cursor-hidden,
-.cursor-ring.cursor-hidden,
-.cursor-dot.cursor-suppressed,
-.cursor-ring.cursor-suppressed {
+.cursor-hand {
+  transform-origin: 13px 3px;
   opacity: 0;
+  transform: scale(0.5) rotate(-20deg);
+}
+.doodle-cursor.cursor-hover .cursor-arrow {
+  opacity: 0;
+  transform: scale(0.5) rotate(20deg);
+}
+.doodle-cursor.cursor-hover .cursor-hand {
+  opacity: 1;
+  transform: scale(1) rotate(-8deg);
+  animation: cursor-wiggle 1.2s ease-in-out infinite;
+}
+.doodle-cursor.cursor-press .cursor-art {
+  animation: cursor-squish 260ms var(--ease-spring);
+}
+
+@keyframes cursor-wiggle {
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+  50% {
+    rotate: 8deg;
+  }
+}
+@keyframes cursor-squish {
+  0% {
+    scale: 1;
+  }
+  40% {
+    scale: 0.72 0.85;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+.doodle-cursor.cursor-hidden,
+.doodle-cursor.cursor-suppressed {
+  opacity: 0;
+}
+.doodle-cursor-layer:has(.doodle-cursor.cursor-hidden) .cursor-trail,
+.doodle-cursor-layer:has(.doodle-cursor.cursor-suppressed) .cursor-trail {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-trail {
+    display: none;
+  }
+  .doodle-cursor.cursor-hover .cursor-hand {
+    animation: none;
+  }
 }
 
 @keyframes float-up {

@@ -111,3 +111,18 @@
   font-size: 18px;
   pointer-events: none;
 }
+
+.lb-reaction {
+  position: absolute;
+  top: -6px;
+  left: 56px;
+  font-size: 20px;
+  line-height: 1;
+  background: var(--color-bg-raised);
+  border: 2px solid var(--color-ink);
+  border-radius: 50% 50% 50% 4px;
+  padding: 3px;
+  box-shadow: 2px 2px 0 var(--color-ink);
+  pointer-events: none;
+  z-index: 2;
+}

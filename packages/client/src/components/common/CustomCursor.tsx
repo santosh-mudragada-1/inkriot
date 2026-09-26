@@ -1,16 +1,21 @@
 import { useEffect, useRef } from "react";
 import { pointerPosition } from "../../lib/pointerPosition";
+import { DoodleArrow, DoodleHand } from "./CursorArt";
+import { ARROW_HOTSPOT, HAND_HOTSPOT } from "./cursorHotspots";
 
-const INTERACTIVE_SELECTOR = 'button, a, input, select, textarea, [role="button"], [data-clickable]';
+const INTERACTIVE_SELECTOR = 'button, a, input, select, textarea, label, [role="button"], [data-clickable]';
+const TRAIL_COLORS = ["var(--color-tomato)", "var(--color-sun)", "var(--color-sky)", "var(--color-gum)"];
 
 /**
- * A single global cursor dot, moved with a ref + rAF so pointer motion never
- * triggers a React re-render. Disabled entirely on touch/coarse-pointer devices.
+ * A doodle arrow that turns into a pointing glove over anything clickable, squishes
+ * on click, and drags a little crayon-dot trail behind it. Moved with refs + rAF so
+ * pointer motion never re-renders React. Disabled on touch/coarse-pointer devices,
+ * and hidden over a live drawing canvas, which shows its own tool cursor.
  */
 export function CustomCursor() {
-  const dotRef = useRef<HTMLDivElement>(null);
-  const ringRef = useRef<HTMLDivElement>(null);
-  const ring = useRef({ x: -100, y: -100 });
+  const rootRef = useRef<HTMLDivElement>(null);
+  const trailRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const trail = useRef(TRAIL_COLORS.map(() => ({ x: -100, y: -100 })));
   const raf = useRef<number | null>(null);
 
   useEffect(() => {
@@ -18,23 +23,17 @@ export function CustomCursor() {
     if (!canHover) return;
 
     document.body.classList.add("has-custom-cursor");
+    const root = rootRef.current;
 
-    const onLeave = () => {
-      dotRef.current?.classList.add("cursor-hidden");
-      ringRef.current?.classList.add("cursor-hidden");
-    };
-    const onEnter = () => {
-      dotRef.current?.classList.remove("cursor-hidden");
-      ringRef.current?.classList.remove("cursor-hidden");
-    };
+    const onLeave = () => root?.classList.add("cursor-hidden");
+    const onEnter = () => root?.classList.remove("cursor-hidden");
     const onDown = () => {
-      dotRef.current?.classList.add("cursor-press");
-      ringRef.current?.classList.add("cursor-press");
+      root?.classList.remove("cursor-press");
+      // restart the squish animation on every click
+      void root?.offsetWidth;
+      root?.classList.add("cursor-press");
     };
-    const onUp = () => {
-      dotRef.current?.classList.remove("cursor-press");
-      ringRef.current?.classList.remove("cursor-press");
-    };
+    const onUp = () => window.setTimeout(() => root?.classList.remove("cursor-press"), 120);
 
     document.addEventListener("mouseleave", onLeave);
     document.addEventListener("mouseenter", onEnter);
@@ -42,25 +41,30 @@ export function CustomCursor() {
     window.addEventListener("pointerup", onUp);
 
     const tick = () => {
-      const target = pointerPosition;
-      ring.current.x += (target.x - ring.current.x) * 0.32;
-      ring.current.y += (target.y - ring.current.y) * 0.32;
-      if (dotRef.current) {
-        dotRef.current.style.transform = `translate3d(${target.x}px, ${target.y}px, 0) translate(-50%, -50%)`;
-      }
-      if (ringRef.current) {
-        ringRef.current.style.transform = `translate3d(${ring.current.x}px, ${ring.current.y}px, 0) translate(-50%, -50%)`;
-      }
+      const { x, y } = pointerPosition;
+      if (root) root.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+
+      // each trail dot chases the one before it
+      let lead = { x, y };
+      trail.current.forEach((dot, i) => {
+        dot.x += (lead.x - dot.x) * 0.35;
+        dot.y += (lead.y - dot.y) * 0.35;
+        const el = trailRefs.current[i];
+        if (el) {
+          const lag = Math.hypot(dot.x - x, dot.y - y);
+          el.style.transform = `translate3d(${dot.x}px, ${dot.y}px, 0) translate(-50%, -50%) scale(${Math.min(1, lag / 30)})`;
+        }
+        lead = dot;
+      });
+
       // Re-derived every frame (not just on pointermove) so a stationary mouse is still
       // correctly hidden/hovered the instant the element underneath it changes — e.g. when
       // the drawing canvas appears under an already-still cursor at round start.
-      const el = document.elementFromPoint(target.x, target.y);
+      const el = document.elementFromPoint(x, y);
       const hovering = !!el?.closest(INTERACTIVE_SELECTOR);
       const inCanvas = !!el?.closest("[data-drawing-canvas]");
-      dotRef.current?.classList.toggle("cursor-hover", hovering);
-      dotRef.current?.classList.toggle("cursor-suppressed", inCanvas);
-      ringRef.current?.classList.toggle("cursor-hover", hovering);
-      ringRef.current?.classList.toggle("cursor-suppressed", inCanvas);
+      root?.classList.toggle("cursor-hover", hovering);
+      root?.classList.toggle("cursor-suppressed", inCanvas);
       raf.current = requestAnimationFrame(tick);
     };
     raf.current = requestAnimationFrame(tick);
@@ -76,9 +80,25 @@ export function CustomCursor() {
   }, []);
 
   return (
-    <>
-      <div ref={ringRef} className="cursor-ring" aria-hidden />
-      <div ref={dotRef} className="cursor-dot" aria-hidden />
-    </>
+    <div className="doodle-cursor-layer" aria-hidden>
+      {TRAIL_COLORS.map((c, i) => (
+        <span
+          key={c}
+          ref={(el) => {
+            trailRefs.current[i] = el;
+          }}
+          className="cursor-trail"
+          style={{ background: c, width: 9 - i * 1.5, height: 9 - i * 1.5 }}
+        />
+      ))}
+      <div ref={rootRef} className="doodle-cursor">
+        <span className="cursor-art cursor-arrow" style={{ left: -ARROW_HOTSPOT.x, top: -ARROW_HOTSPOT.y }}>
+          <DoodleArrow />
+        </span>
+        <span className="cursor-art cursor-hand" style={{ left: -HAND_HOTSPOT.x, top: -HAND_HOTSPOT.y }}>
+          <DoodleHand />
+        </span>
+      </div>
+    </div>
   );
 }

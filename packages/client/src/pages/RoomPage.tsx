@@ -26,9 +26,16 @@ export default function RoomPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (room && room.code === roomCode) {
+    const { activeCode } = useGameStore.getState();
+    if (room && room.code === roomCode && activeCode === roomCode) {
       setState("ready");
       return;
+    }
+    // Arrived here while still attached to a different room (e.g. pasted a new link):
+    // leave it first so its updates can't bleed into this one.
+    if (activeCode && activeCode !== roomCode) {
+      if (socket.connected) socket.emit("leave_room");
+      useGameStore.getState().reset();
     }
     if (!connected) return;
 
@@ -37,7 +44,7 @@ export default function RoomPage() {
       setState("rejoining");
       socket.emit("rejoin_room", { code: roomCode, sessionId: session.sessionId }, (res) => {
         if (res.ok && res.playerId) {
-          useGameStore.getState().setSelfId(res.playerId);
+          useGameStore.getState().enterRoom(roomCode, res.playerId);
           setState("ready");
         } else {
           setState("need-name");
@@ -57,7 +64,7 @@ export default function RoomPage() {
     socket.emit("join_room", { code: roomCode, nickname: nickname.trim(), avatar: useProfile.getState().encoded() }, (res) => {
       if (res.ok && res.code && res.sessionId && res.playerId) {
         saveSession({ code: res.code, sessionId: res.sessionId, playerId: res.playerId, nickname: nickname.trim() });
-        useGameStore.getState().setSelfId(res.playerId);
+        useGameStore.getState().enterRoom(res.code, res.playerId);
         setState("ready");
       } else {
         setError(res.error ?? "Couldn't join that room.");
@@ -66,7 +73,7 @@ export default function RoomPage() {
     });
   };
 
-  if (state === "ready" && room) {
+  if (state === "ready" && room && room.code === roomCode) {
     if (room.phase === "GAME_COMPLETE") return <EndScreen />;
     if (room.phase === "LOBBY") return <Lobby />;
     return <GameScreen />;
