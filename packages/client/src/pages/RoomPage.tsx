@@ -12,6 +12,7 @@ import Lobby from "../components/lobby/Lobby";
 import GameScreen from "../components/game/GameScreen";
 import EndScreen from "../components/game/EndScreen";
 import "./RoomPage.css";
+import { track } from "../lib/myAnalytics";
 
 type JoinState = "checking" | "rejoining" | "need-name" | "joining" | "ready" | "failed";
 
@@ -65,9 +66,11 @@ export default function RoomPage() {
       if (res.ok && res.code && res.sessionId && res.playerId) {
         saveSession({ code: res.code, sessionId: res.sessionId, playerId: res.playerId, nickname: nickname.trim() });
         useGameStore.getState().enterRoom(res.code, res.playerId);
+        track("room_joined", { via: "link" });
         setState("ready");
       } else {
         setError(res.error ?? "Couldn't join that room.");
+        track("room_join_failed", { reason: (res.error ?? "unknown").slice(0, 60), via: "link" });
         setState("need-name");
       }
     });

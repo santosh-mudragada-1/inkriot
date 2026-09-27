@@ -7,6 +7,7 @@ import { audio } from "../lib/audio/AudioManager";
 import { useProgress } from "../lib/progress";
 import { confetti, shake } from "../lib/juice";
 import { bufferCanvasHistory } from "../lib/canvasHistoryBuffer";
+import { captureError, track } from "../lib/myAnalytics";
 
 function revealedLetterCount(pattern: (string | null)[] | null): number {
   if (!pattern) return 0;
@@ -21,24 +22,32 @@ function trackProgress(prev: RoomSnapshot | null, next: RoomSnapshot, selfId: st
   const prevMe = prev?.players.find((p) => p.id === selfId);
 
   // A new game started (lobby -> first word pick).
-  if (prev && prev.phase === "LOBBY" && next.phase === "WORD_SELECTION") progress.beginGame();
+  if (prev && prev.phase === "LOBBY" && next.phase === "WORD_SELECTION") {
+    progress.beginGame();
+    track("game_started", { players: next.players.length, is_host: next.hostId === selfId });
+  }
 
   // I just guessed correctly.
   if (me && prevMe && next.phase === "DRAWING" && me.hasGuessedCorrectly && !prevMe.hasGuessedCorrectly) {
     const correctCount = next.players.filter((p) => p.id !== next.artistId && p.hasGuessedCorrectly).length;
     progress.recordCorrect({ ms: me.lastGuessMs, streak: me.streak, first: correctCount === 1 });
+    track("word_guessed", { ms: me.lastGuessMs, streak: me.streak, first: correctCount === 1 });
   }
 
   // My drawing turn just ended.
   if (prev && prev.phase === "DRAWING" && next.phase === "ROUND_REVEAL" && prev.artistId === selfId) {
     const guessers = next.players.filter((p) => p.id !== selfId && p.connected);
-    progress.recordDrawTurn({ guessed: guessers.filter((p) => p.hasGuessedCorrectly).length, guessers: guessers.length });
+    const guessed = guessers.filter((p) => p.hasGuessedCorrectly).length;
+    progress.recordDrawTurn({ guessed, guessers: guessers.length });
+    track("drawing_completed", { guessed, guessers: guessers.length });
   }
 
   // Game over.
   if (prev && prev.phase !== "GAME_COMPLETE" && next.phase === "GAME_COMPLETE" && me) {
     const sorted = [...next.players].sort((a, b) => b.score - a.score);
-    progress.finishGame({ score: me.score, rank: sorted.findIndex((p) => p.id === selfId) + 1, playerCount: next.players.length });
+    const rank = sorted.findIndex((p) => p.id === selfId) + 1;
+    progress.finishGame({ score: me.score, rank, playerCount: next.players.length });
+    track("game_completed", { rank, players: next.players.length, score: me.score, won: rank === 1 });
   }
 }
 
@@ -58,7 +67,10 @@ export function useSocketBridge() {
       if (activeCode && session?.code === activeCode) {
         socket.emit("rejoin_room", { code: activeCode, sessionId: session.sessionId }, (res) => {
           if (res.ok && res.playerId) store().enterRoom(activeCode, res.playerId);
-          else store().setError("You were disconnected from the room.");
+          else {
+            store().setError("You were disconnected from the room.");
+            captureError(new Error("Rejoin after reconnect failed"), { reason: res.error ?? "unknown" });
+          }
         });
       }
     };

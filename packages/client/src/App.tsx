@@ -8,6 +8,7 @@ import { audio } from "./lib/audio/AudioManager";
 import LandingPage from "./pages/LandingPage";
 import RoomPage from "./pages/RoomPage";
 import "./App.css";
+import { InkriotFeedbackButton } from "./components/common/InkriotFeedbackButton";
 
 export default function App() {
   useSocketBridge();
@@ -31,6 +32,7 @@ export default function App() {
       <CustomCursor />
       <SoundToggle />
       <ProgressToasts />
+      <InkriotFeedbackButton />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/room/:code" element={<RoomPage />} />

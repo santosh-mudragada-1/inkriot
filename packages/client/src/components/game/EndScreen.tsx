@@ -15,6 +15,7 @@ import { Logo } from "../common/Logo";
 import { XpBar } from "../profile/ProfileCard";
 import { MemorySheet } from "./MemorySheet";
 import "./EndScreen.css";
+import { showFeedback, track } from "../../lib/myAnalytics";
 
 const PODIUM_ORDER = [1, 0, 2]; // 2nd, 1st, 3rd left-to-right
 const PODIUM_COLORS = ["var(--color-sun)", "var(--color-sky)", "var(--color-gum)"];
@@ -136,6 +137,7 @@ export default function EndScreen() {
       if (navigator.share && window.matchMedia("(pointer: coarse)").matches) await navigator.share({ text });
       else await navigator.clipboard.writeText(text);
       setShared(true);
+      track("results_shared");
       audio.playPop(1.3);
       setTimeout(() => setShared(false), 1800);
     } catch {
@@ -186,7 +188,15 @@ export default function EndScreen() {
 
       <motion.div className="end-actions" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.3 }}>
         {isHost ? (
-          <Button variant="primary" size="lg" display onClick={() => socket.emit("play_again")}>
+          <Button
+            variant="primary"
+            size="lg"
+            display
+            onClick={() => {
+              track("play_again");
+              socket.emit("play_again");
+            }}
+          >
             Rematch!
           </Button>
         ) : (
@@ -197,6 +207,9 @@ export default function EndScreen() {
         </Button>
         <Button variant="ghost" onClick={() => navigate("/")}>
           Back to home
+        </Button>
+        <Button variant="ghost" onClick={() => showFeedback()}>
+          Send feedback
         </Button>
       </motion.div>
 

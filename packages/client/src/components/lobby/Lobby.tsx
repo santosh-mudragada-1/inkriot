@@ -10,6 +10,7 @@ import { Canvas, type CanvasHandle } from "../drawing/Canvas";
 import { GameSettingsPanel } from "../settings/GameSettingsPanel";
 import { PlayerCard } from "./PlayerCard";
 import "./Lobby.css";
+import { track } from "../../lib/myAnalytics";
 
 const ROTATIONS = [-4, 3, -2, 4, -3, 2, -1.5, 3.5, -2.5, 1.5, -3.5, 2.5];
 const WALL_COLORS = [PALETTE[0], PALETTE[1], PALETTE[3], PALETTE[5], PALETTE[6], PALETTE[7], PALETTE[8]];
@@ -39,6 +40,7 @@ export default function Lobby() {
         await navigator.clipboard.writeText(url);
       }
       setCopied(true);
+      track("invite_shared", { from: "lobby" });
       audio.playPop(1.3);
       setTimeout(() => setCopied(false), 1800);
     } catch {

@@ -5,6 +5,7 @@ import { socket } from "../lib/socket";
 import { saveSession, saveNickname } from "../lib/session";
 import { useGameStore } from "../store/useGameStore";
 import { useProfile } from "../lib/profile";
+import { captureError, track } from "../lib/myAnalytics";
 
 function withTimeout<T>(fn: (cb: (res: T) => void) => void, ms = 6000): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -34,9 +35,11 @@ export function useRoomActions() {
         saveNickname(nickname);
         saveSession({ code: res.code, sessionId: res.sessionId, playerId: res.playerId, nickname });
         useGameStore.getState().enterRoom(res.code, res.playerId);
+        track("room_created");
         navigate(`/room/${res.code}`);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Something went wrong.");
+        captureError(e, { where: "create_room" });
       } finally {
         setPending(false);
       }
@@ -53,14 +56,17 @@ export function useRoomActions() {
         const res = await withTimeout<JoinRoomResult>((cb) => socket.emit("join_room", { code: cleanCode, nickname, avatar: useProfile.getState().encoded() }, cb));
         if (!res.ok || !res.code || !res.sessionId || !res.playerId) {
           setError(res.error ?? "Couldn't join that room.");
+          track("room_join_failed", { reason: (res.error ?? "unknown").slice(0, 60), via: "code" });
           return;
         }
         saveNickname(nickname);
         saveSession({ code: res.code, sessionId: res.sessionId, playerId: res.playerId, nickname });
         useGameStore.getState().enterRoom(res.code, res.playerId);
+        track("room_joined", { via: "code" });
         navigate(`/room/${res.code}`);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Something went wrong.");
+        captureError(e, { where: "join_room" });
       } finally {
         setPending(false);
       }

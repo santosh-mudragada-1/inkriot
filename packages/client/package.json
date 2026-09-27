@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@inkriot/shared": "*",
+    "@my-analytics/client": "https://my-analytics-ruby.vercel.app/sdk/my-analytics-client-0.1.1.tgz",
     "framer-motion": "^13.4.4",
     "nanoid": "^5.1.16",
     "react": "^19.2.8",
