@@ -8,7 +8,19 @@
   overflow: hidden;
   box-shadow: 8px 8px 0 var(--color-ink);
   touch-action: none;
+  /* A held finger while drawing must never become a long-press: no text
+     selection, no iOS copy/share callout, no grey tap flash. */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
   transition: box-shadow var(--dur-base) ease;
+}
+
+.canvas-frame * {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .canvas-frame.canvas-game.is-live {

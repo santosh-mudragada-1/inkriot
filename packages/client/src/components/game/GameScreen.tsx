@@ -4,6 +4,7 @@ import { useGameStore } from "../../store/useGameStore";
 import { audio } from "../../lib/audio/AudioManager";
 import { useCountdown } from "../../hooks/useCountdown";
 import { RoundHeader } from "./RoundHeader";
+import { GameNotices } from "./GameNotices";
 import { Canvas, type CanvasHandle } from "../drawing/Canvas";
 import { Toolbar } from "../drawing/Toolbar";
 import { Leaderboard } from "../leaderboard/Leaderboard";
@@ -40,7 +41,10 @@ export default function GameScreen() {
     audio.setMusicDuck(room.phase === "DRAWING" ? 0.55 : 1);
   }, [room.phase]);
 
-  const guessPlaceholder = isArtist
+  const spectating = room.viewerRole === "spectator";
+  const guessPlaceholder = spectating
+    ? "Just watching — you'll join the next game"
+    : isArtist
     ? "You're drawing — no peeking in chat 😉"
     : self?.hasGuessedCorrectly
       ? "You got it! 🎉"
@@ -53,11 +57,12 @@ export default function GameScreen() {
     if (next === "chat" || sheet === "chat") setSeenCount(unread);
     setSheet(target);
   };
-  const inputDisabled = isArtist || !!self?.hasGuessedCorrectly || room.phase !== "DRAWING";
+  const inputDisabled = spectating || isArtist || !!self?.hasGuessedCorrectly || room.phase !== "DRAWING";
 
   return (
     <div className={`game-screen ${isArtist ? "is-artist" : ""}`}>
       <RoundHeader />
+      <GameNotices />
 
       <div className="game-body">
         <aside className="game-panel panel-left">

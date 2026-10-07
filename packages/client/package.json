@@ -13,6 +13,7 @@
     "@inkriot/shared": "*",
     "@my-analytics/client": "https://my-analytics-ruby.vercel.app/sdk/my-analytics-client-0.1.2.tgz",
     "framer-motion": "^13.4.4",
+    "gsap": "^3.15.0",
     "nanoid": "^5.1.16",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

@@ -130,7 +130,7 @@ export default function EndScreen() {
       `INKRIOT — room ${room.code}`,
       ...sorted.map((p, i) => `${medals[i] ?? `${i + 1}.`} ${p.name} — ${p.score}`),
       "",
-      `Play with us: ${window.location.origin}/room/${room.code}`,
+      `Play with us: ${window.location.origin}${import.meta.env.BASE_URL}room/${room.code}`,
     ];
     const text = lines.join("\n");
     try {

@@ -48,9 +48,9 @@ export function registerHandlers(io: IOServer, manager: RoomManager) {
       socket.data.roomCode = room.code;
       socket.data.playerId = result.playerId;
       socket.join(room.code);
-      cb({ ok: true, code: room.code, sessionId: result.sessionId, playerId: result.playerId });
-      const player = room.players.get(result.playerId);
-      if (player) room.addSystemMessage(`${player.name} joined the room.`);
+      cb({ ok: true, code: room.code, sessionId: result.sessionId, playerId: result.playerId, spectator: result.spectator });
+      const joiner = room.players.get(result.playerId) ?? room.spectators.get(result.playerId);
+      if (joiner) room.addSystemMessage(result.spectator ? `${joiner.name} is watching this game.` : `${joiner.name} joined the room.`);
       sendJoinExtras(socket, room, result.playerId);
     });
 
@@ -108,6 +108,12 @@ export function registerHandlers(io: IOServer, manager: RoomManager) {
       const room = currentRoom(socket, manager);
       if (!room || !socket.data.playerId) return;
       room.playAgain(socket.data.playerId);
+    });
+
+    socket.on("vote_skip_artist", () => {
+      const room = currentRoom(socket, manager);
+      if (!room || !socket.data.playerId) return;
+      room.voteSkipArtist(socket.data.playerId);
     });
 
     socket.on("leave_room", () => leaveCurrentRoom(socket, manager));

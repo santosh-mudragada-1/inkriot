@@ -1,0 +1,776 @@
+/*
+ * INKRIOT teaser — a 1920×1080 stage scaled to fit. Everything visual comes from the
+ * product's own tokens and component CSS; this file only positions the film's layers and
+ * pins viewport-dependent product styles to their desktop values so every viewer
+ * renders the identical frame.
+ */
+
+.teaser {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483600; /* above the app's floating chrome, incl. the analytics feedback button */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  background-color: var(--color-bg);
+  background-image:
+    linear-gradient(var(--color-grid-strong) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, var(--color-grid-strong) 1.5px, transparent 1.5px),
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
+  background-position: -1px -1px;
+  overflow: hidden;
+}
+.teaser.is-clean {
+  padding: 0;
+  gap: 0;
+}
+
+/* the app may have hidden the system cursor for its doodle cursor; the teaser has none */
+.has-custom-cursor .teaser,
+.has-custom-cursor .teaser * {
+  cursor: auto !important;
+}
+.has-custom-cursor .teaser button,
+.has-custom-cursor .teaser .tc-track {
+  cursor: pointer !important;
+}
+
+.teaser-screen {
+  display: grid;
+  place-items: center;
+}
+
+.teaser-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  background: var(--color-bg);
+  box-shadow: 0 0 0 3px var(--color-ink), 9px 9px 0 3px var(--color-ink);
+  flex-shrink: 0;
+}
+.is-clean .teaser-frame {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.teaser-stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  transform-origin: 0 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--color-bg);
+  opacity: 0;
+  transition: opacity 240ms ease;
+}
+.is-ready .teaser-stage {
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------------ world + camera */
+
+.world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+}
+
+.paper {
+  position: absolute;
+  /* multiples of 96 so the big grid lines land on the product's own grid */
+  left: -2976px;
+  top: -1920px;
+  width: 7968px;
+  height: 4992px;
+  background-color: var(--color-bg);
+  background-image:
+    linear-gradient(var(--color-grid-strong) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, var(--color-grid-strong) 1.5px, transparent 1.5px),
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
+  background-position: -1px -1px;
+}
+
+.paint {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+}
+
+.chaos-layer,
+.org-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.ci {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+.ci-sweep {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+.ci-body {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: max-content;
+  visibility: hidden;
+}
+.ci-inner {
+  transform-origin: 50% 75%;
+}
+
+.org-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+.org-arrow > div {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: max-content;
+}
+
+/* strokes that draw themselves on start undrawn */
+.teaser-stage .draw-svg path,
+.teaser-stage .final-scribble path,
+.teaser-stage .bm-ink,
+.teaser-stage .teaser-pickring path {
+  /* the gap is longer than the path: an undrawn path must never end on a (zero-length,
+     round-capped) dash — browsers paint that as a stray dot */
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1;
+}
+.org-layer .draw-svg path {
+  stroke-dashoffset: 0;
+}
+
+/* ------------------------------------------------------------------ the product layer */
+
+.ui-conv {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  transform-origin: 960px 540px;
+}
+.ui-bob {
+  position: absolute;
+  inset: 0;
+  transform-origin: 960px 540px;
+}
+.teaser-ui {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  visibility: hidden;
+  background-color: var(--color-bg);
+  background-image:
+    linear-gradient(var(--color-grid-strong) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, var(--color-grid-strong) 1.5px, transparent 1.5px),
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
+  background-position: -1px -1px;
+}
+.ui-frame {
+  position: absolute;
+  inset: 0;
+  border: 10px solid var(--color-ink);
+  border-radius: 44px;
+  box-shadow: 0 0 0 18px var(--color-bg-raised), 34px 38px 0 18px rgba(27, 19, 64, 0.22);
+  pointer-events: none;
+  opacity: 0;
+}
+.ui-tape {
+  width: 250px;
+  height: 70px;
+  visibility: hidden;
+}
+
+.teaser-glove {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 90;
+  transform-origin: 0 0;
+  visibility: hidden;
+  filter: drop-shadow(1px 2px 0 rgba(27, 19, 64, 0.18));
+}
+.teaser-pickring {
+  position: absolute;
+  z-index: 50;
+}
+.teaser-card-fly {
+  display: inline-block;
+  position: relative;
+}
+.teaser-rh-word {
+  position: relative;
+  min-height: 64px;
+  justify-content: center;
+}
+.teaser-drawthis {
+  position: absolute;
+  inset: -6px -40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.teaser-ui .tool-fill .tool-cursor-ring {
+  display: none;
+}
+.teaser-ui .lb-popup {
+  opacity: 0;
+}
+.teaser-ui .floating-reaction {
+  opacity: 0;
+}
+.teaser-ui .combo-stamp {
+  opacity: 0;
+}
+
+/* ---- the product's desktop layout, pinned (its media queries read the real viewport) */
+.teaser-ui .game-screen {
+  padding: 8px 16px 16px;
+  height: 100%;
+  max-width: 1480px;
+}
+.teaser-ui .game-body {
+  grid-template-columns: 230px minmax(0, 1fr) 300px;
+  gap: 24px;
+}
+.teaser-ui .panel-left,
+.teaser-ui .panel-right {
+  display: flex;
+}
+.teaser-ui .canvas-wrap {
+  min-height: 0;
+}
+.teaser-ui .canvas-frame {
+  box-shadow: 8px 8px 0 var(--color-ink);
+}
+.teaser-ui .canvas-frame.is-live {
+  box-shadow: 8px 8px 0 var(--color-ink), 0 0 0 6px var(--color-sun);
+}
+.teaser-ui .round-header {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  padding: 8px 110px 8px 8px;
+  gap: 16px;
+  min-height: 72px;
+}
+.teaser-ui .rh-left .logo {
+  display: inline-flex;
+}
+.teaser-stage .rh-timer,
+.teaser-stage .rh-timer svg {
+  width: 60px;
+  height: 60px;
+}
+.teaser-stage .rh-timer-num {
+  font-size: 21px;
+}
+.teaser-stage .toolbar {
+  gap: 12px;
+  padding: 8px 14px;
+  border-radius: var(--radius-lg);
+}
+.teaser-stage .toolbar-divider {
+  display: block;
+}
+.teaser-stage .tool-chip {
+  width: 54px;
+  height: 52px;
+}
+.teaser-stage .tool-chip-label {
+  display: inline;
+}
+.teaser-stage .tool-chip.is-action {
+  width: 46px;
+  height: 46px;
+}
+.teaser-stage .size-chip {
+  width: 36px;
+  height: 36px;
+}
+.teaser-stage .toolbar-palette {
+  grid-template-columns: repeat(10, 22px);
+  gap: 5px;
+  order: 0;
+  width: auto;
+}
+.teaser-stage .swatch {
+  width: 22px;
+  height: 22px;
+}
+.teaser-stage .overlay-scrim {
+  overflow: visible;
+}
+.teaser-stage .word-cards {
+  gap: var(--space-5);
+}
+.teaser-stage .word-card {
+  min-width: 170px;
+  width: auto;
+  max-width: 240px;
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  box-shadow: 7px 8px 0 var(--color-ink);
+}
+.teaser-stage .hint-slot {
+  width: 24px;
+  height: 34px;
+}
+.teaser-stage .hint-gap {
+  width: 14px;
+}
+/* vw-based clamps, fixed at their desktop maximums */
+.teaser-stage .rh-artist-word {
+  font-size: 34px;
+}
+.teaser-stage .word-card-word {
+  font-size: 30px;
+}
+.teaser-stage .word-select-hint {
+  font-size: 36px;
+}
+.teaser-stage .combo-headline {
+  font-size: 52px;
+}
+.teaser-stage .combo-points {
+  font-size: 76px;
+}
+.teaser-stage .hint-letter {
+  font-size: 30px;
+}
+
+/* ------------------------------------------------------------------ pulled-out fragments at film scale */
+
+.teaser-stage .headline-sticker {
+  font-family: var(--font-display);
+  line-height: 0.95;
+  white-space: nowrap;
+}
+.teaser-stage .headline-sticker.is-stroked {
+  color: #fff;
+  -webkit-text-stroke: 3px var(--color-ink);
+  paint-order: stroke fill;
+}
+.too-many {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.too-many .headline-sticker {
+  margin: 0;
+}
+.tm-line1 {
+  font-size: 112px;
+}
+.tm-line2 {
+  font-size: 176px;
+}
+
+.splash-item {
+  position: relative;
+  width: 900px;
+  height: 760px;
+}
+.splash-svg {
+  display: block;
+  overflow: visible;
+}
+.splash-item .hand-word {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.hand-word {
+  --r: 0;
+  display: block;
+  overflow: visible;
+  /* a wobbly writing front sweeping left → right */
+  clip-path: polygon(
+    -5% -5%,
+    calc(var(--r) * 116% - 12%) -5%,
+    calc(var(--r) * 116% - 6%) 22%,
+    calc(var(--r) * 116% - 11%) 48%,
+    calc(var(--r) * 116% - 4%) 74%,
+    calc(var(--r) * 116% - 9%) 105%,
+    -5% 105%
+  );
+}
+
+.pen1 {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 7.8px 96.2px;
+  visibility: hidden;
+  filter: drop-shadow(4px 6px 0 rgba(27, 19, 64, 0.2));
+}
+.pen1 svg {
+  width: 104px;
+  height: 104px;
+  display: block;
+}
+
+.big-brush {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 320px;
+  height: 320px;
+  transform-origin: 24px 296px;
+  visibility: hidden;
+}
+.big-brush-art {
+  position: absolute;
+  inset: 0;
+}
+.big-brush svg {
+  width: 320px;
+  height: 320px;
+  display: block;
+  filter: drop-shadow(10px 14px 0 rgba(27, 19, 64, 0.22));
+}
+
+.teaser-stage .ci .guess-line {
+  zoom: 2.2;
+  max-width: none;
+  white-space: nowrap;
+}
+.teaser-stage .ci .lb-row {
+  zoom: 2;
+  width: 250px;
+}
+.teaser-stage .ci .tool-chip {
+  zoom: 2.3;
+}
+.teaser-stage .ci .swatch-fragment {
+  zoom: 1.7;
+}
+.teaser-stage .ci .rh-timer {
+  zoom: 2.4;
+}
+.teaser-stage .ci .word-card {
+  zoom: 1.25;
+}
+.teaser-stage .ci .hint-fragment {
+  zoom: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.teaser-stage .ci .btn {
+  zoom: 1.9;
+}
+.teaser-stage .ci .combo-stamp {
+  zoom: 0.95;
+}
+.teaser-stage .reaction-sticker {
+  position: static;
+  display: inline-block;
+  zoom: 1.5;
+}
+.teaser-stage .teaser-tape {
+  position: static;
+  display: block;
+  width: 170px;
+  height: 46px;
+}
+.teaser-stage .mini-sketch {
+  width: 272px;
+  height: 202px;
+  box-shadow: 7px 7px 0 var(--color-ink);
+}
+.teaser-stage .mini-sketch svg {
+  display: block;
+}
+
+/* ------------------------------------------------------------------ screen-space layers */
+
+.ink-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+}
+
+.titles {
+  position: absolute;
+  inset: 0;
+}
+.final-scribble {
+  position: absolute;
+  left: 660px;
+  top: 170px;
+  overflow: visible;
+}
+.final-dot {
+  position: absolute;
+  left: 940px;
+  top: 450px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-ink);
+  transform: scale(0);
+}
+.final-lockup {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 382px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+}
+.final-mark {
+  visibility: hidden;
+  filter: drop-shadow(9px 12px 0 rgba(27, 19, 64, 0.22));
+}
+.final-mark svg {
+  display: block;
+  overflow: visible;
+}
+/* the wordmark from components/common/Logo, at 4.5× its md size */
+.teaser-logo {
+  gap: 14px;
+}
+.teaser-logo .logo-letter {
+  width: 158px;
+  height: 176px;
+  font-size: 108px;
+  border-width: 10px;
+  border-radius: 38px;
+  box-shadow: 9px 13px 0 var(--color-ink);
+  visibility: hidden;
+}
+.teaser-tagline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 668px;
+  display: flex;
+  justify-content: center;
+  gap: 44px;
+  font-size: 78px;
+}
+.teaser-tagline .headline-sticker {
+  margin: 0;
+  visibility: hidden;
+}
+
+.grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.07 0 0 0 0 0.25 0 0 0 1.4 -0.35'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ------------------------------------------------------------------ controls */
+
+.teaser-controls {
+  width: min(1180px, calc(100vw - 48px));
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 18px 10px 12px;
+  background: var(--color-bg-raised);
+  border: var(--stroke) solid var(--color-ink);
+  border-radius: 22px;
+  box-shadow: 5px 5px 0 var(--color-ink);
+}
+.tc-buttons {
+  display: flex;
+  gap: 10px;
+}
+.tc-btn {
+  min-width: 124px;
+  padding: 9px 18px;
+}
+.tc-timeline {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 6px;
+}
+.tc-track {
+  position: relative;
+  height: 20px;
+  border: var(--stroke) solid var(--color-ink);
+  border-radius: var(--radius-pill);
+  background: var(--color-paper);
+  cursor: pointer;
+  touch-action: none;
+}
+.tc-track:focus-visible {
+  outline: 3px solid var(--color-grape);
+  outline-offset: 3px;
+}
+.tc-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--color-tomato);
+  border-radius: var(--radius-pill);
+  pointer-events: none;
+}
+.tc-tick {
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--color-ink);
+  opacity: 0.35;
+  pointer-events: none;
+}
+.tc-knob {
+  position: absolute;
+  top: 50%;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-sun);
+  border: var(--stroke) solid var(--color-ink);
+  box-shadow: 2px 2px 0 var(--color-ink);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.tc-scenes {
+  position: relative;
+  height: 22px;
+}
+.tc-scene {
+  position: absolute;
+  top: 0;
+  padding: 0 0 0 4px;
+  border: 0;
+  background: none;
+  font-size: 17px;
+  line-height: 22px;
+  color: var(--color-ink-faint);
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.tc-scene:hover {
+  color: var(--color-ink);
+}
+.tc-scene.is-now {
+  color: var(--color-grape);
+}
+.tc-time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 118px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.tc-time b {
+  font-size: 24px;
+}
+.tc-time span {
+  font-size: 13px;
+  color: var(--color-ink-soft);
+}
+
+@media (max-width: 720px) {
+  .teaser-controls {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .tc-btn span {
+    display: none;
+  }
+  .tc-btn {
+    min-width: 0;
+  }
+  .tc-timeline {
+    order: 3;
+    flex-basis: 100%;
+  }
+  .tc-scene {
+    font-size: 13px;
+  }
+}
+
+/* sound: the game's round sticker toggle, plus a hand-lettered status note */
+.tc-sound {
+  flex-shrink: 0;
+  align-self: center;
+}
+.tc-note {
+  margin-top: 2px;
+  font-size: 15px;
+  font-style: normal;
+  color: var(--color-ink-soft);
+  white-space: nowrap;
+}
+.tc-note.is-nudge {
+  color: var(--color-tomato);
+  animation: wiggle 1.2s ease-in-out infinite;
+}
+.tc-wav {
+  align-self: center;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  font-size: 17px;
+  color: var(--color-ink-soft);
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: underline wavy var(--color-ink-faint);
+  text-underline-offset: 4px;
+}
+.tc-wav:hover:not(:disabled) {
+  color: var(--color-grape);
+}
+.tc-wav:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* frame-by-frame export (?render): nothing may move on the wall clock */
+.teaser.is-render *,
+.teaser.is-render *::before,
+.teaser.is-render *::after {
+  transition: none !important;
+  animation: none !important;
+}

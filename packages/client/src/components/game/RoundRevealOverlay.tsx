@@ -14,8 +14,24 @@ export function RoundRevealOverlay() {
   const me = room.players.find((p) => p.id === selfId);
   const everyone = guessers.length > 0 && correct.length === guessers.length;
 
+  const outcome = room.turnOutcome;
+  const iAmArtist = selfId === room.artistId;
+
+  if (outcome === "skipped" || outcome === "artist_left") {
+    return (
+      <motion.div className="overlay-scrim" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+        <div className="reveal-card">
+          <span className="reveal-label hand">turn skipped</span>
+          <h2 className="reveal-skipped">{outcome === "skipped" ? `${iAmArtist ? "You were" : `${artist?.name ?? "The artist"} was`} offline` : `${artist?.name ?? "The artist"} left`}</h2>
+          <p className="reveal-shield">🛡️ No points this turn — and nobody loses a streak.</p>
+        </div>
+      </motion.div>
+    );
+  }
+
   let verdict = "Nobody got it. Tough crowd!";
-  if (everyone) verdict = "Everyone got it — masterpiece!";
+  if (outcome === "artist_fault") verdict = iAmArtist ? "Nobody guessed it. No points this time." : "Nobody got that one — that's on the artist.";
+  else if (everyone) verdict = "Everyone got it — masterpiece!";
   else if (correct.length > 0) verdict = `${correct.length} of ${guessers.length} got it`;
 
   return (
@@ -38,6 +54,7 @@ export function RoundRevealOverlay() {
         <motion.p className={`reveal-verdict ${everyone ? "is-perfect" : correct.length === 0 ? "is-none" : ""}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }}>
           {verdict}
         </motion.p>
+        {outcome === "artist_fault" && !iAmArtist && <p className="reveal-shield">🛡️ Streaks are safe.</p>}
         {correct.length > 0 && (
           <ol className="reveal-guessers">
             {correct.map((p, i) => (
@@ -56,7 +73,7 @@ export function RoundRevealOverlay() {
             ))}
           </ol>
         )}
-        {me && me.id !== room.artistId && !me.hasGuessedCorrectly && (
+        {me && me.id !== room.artistId && !me.hasGuessedCorrectly && outcome !== "artist_fault" && (
           <p className="reveal-nudge hand">you'll get the next one 💪</p>
         )}
       </div>

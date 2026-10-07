@@ -32,7 +32,7 @@ export default function Lobby() {
   }, []);
 
   const copyLink = async () => {
-    const url = `${window.location.origin}/room/${room.code}`;
+    const url = `${window.location.origin}${import.meta.env.BASE_URL}room/${room.code}`;
     try {
       if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
         await navigator.share({ title: "Join my INKRIOT room", text: `Come draw with me — room ${room.code}`, url });

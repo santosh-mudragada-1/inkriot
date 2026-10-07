@@ -1,10 +1,7 @@
 import { motion } from "framer-motion";
 import { audio } from "../../lib/audio/AudioManager";
+import { FILLS, LETTERS, TILTS } from "./logoLetters";
 import "./Logo.css";
-
-const LETTERS = "INKRIOT".split("");
-const FILLS = ["var(--color-tomato)", "var(--color-sun)", "var(--color-gum)", "var(--color-mint)", "var(--color-sky)", "var(--color-grape)", "var(--color-tomato)"];
-const TILTS = [-8, 5, -4, 7, -6, 4, -3];
 
 /** The wordmark: each letter is its own sticker that boings when hovered. */
 export function Logo({ size = "md", onClick }: { size?: "sm" | "md"; onClick?: () => void }) {

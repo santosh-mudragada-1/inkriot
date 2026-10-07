@@ -9,7 +9,7 @@ initMyAnalytics();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "") || "/"}>
       <App />
     </BrowserRouter>
   </StrictMode>,

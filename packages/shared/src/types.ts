@@ -30,6 +30,32 @@ export interface Player {
   lastGuessMs: number | null;
 }
 
+/** Someone watching a game that started before they arrived; becomes a player when the room returns to the lobby. */
+export interface Spectator {
+  id: string;
+  name: string;
+  color: string;
+  avatar: string;
+  connected: boolean;
+}
+
+/**
+ * How the turn that just ended was settled, for the reveal screen.
+ * - artist_fault: nobody solved it, so nobody loses a streak.
+ * - skipped: the guessers voted to skip an offline artist.
+ * - artist_left: the artist left the room mid-turn.
+ */
+export type TurnOutcome = "artist_fault" | "skipped" | "artist_left";
+
+/** Open while the artist is offline mid-turn; the turn is skipped once every online guesser votes yes. */
+export interface SkipVote {
+  artistName: string;
+  votes: number;
+  needed: number;
+  youVoted: boolean;
+  youCanVote: boolean;
+}
+
 export interface RoundStats {
   fastestGuesserId: string | null;
   fastestGuesserMs: number | null;
@@ -129,6 +155,12 @@ export interface RoomSnapshot {
   awards: EndGameAward[] | null;
   settings: GameSettings;
   hintPattern: (string | null)[] | null;
+  /** Set from the reveal until the next turn begins. */
+  turnOutcome: TurnOutcome | null;
+  skipVote: SkipVote | null;
+  spectators: Spectator[];
+  /** "spectator" means this viewer is watching a game in progress and can't guess or draw. */
+  viewerRole: "player" | "spectator";
 }
 
 export interface CreateRoomPayload {
@@ -147,6 +179,8 @@ export interface JoinRoomResult {
   code?: string;
   sessionId?: string;
   playerId?: string;
+  /** Joined a game already in progress as a watcher. */
+  spectator?: boolean;
 }
 
 export interface ServerToClientEvents {
@@ -171,5 +205,6 @@ export interface ClientToServerEvents {
   send_reaction: (emoji: string) => void;
   draw_op: (op: DrawOp) => void;
   play_again: () => void;
+  vote_skip_artist: () => void;
   leave_room: () => void;
 }

@@ -154,6 +154,8 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(function Canvas({ is
     const tool = mode === "wall" ? "pencil" : state.tool;
     const point = toPoint(e);
     if (!point) return;
+    // stop touch / pen presses from starting a text selection (long-press copy)
+    if (e.pointerType !== "mouse") e.preventDefault();
     (e.target as Element).setPointerCapture(e.pointerId);
 
     if (tool === "fill") {
@@ -249,6 +251,8 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(function Canvas({ is
         cursorDotRef.current?.classList.remove("visible");
         endStroke();
       }}
+      // touch: a long press would otherwise open the copy / context menu
+      onContextMenu={(e) => e.preventDefault()}
     >
       <canvas
         ref={canvasRef}

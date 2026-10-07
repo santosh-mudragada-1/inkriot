@@ -1,15 +1,51 @@
-import { ARTIST_POINTS_PER_GUESSER, MAX_POINTS, MAX_STREAK_BONUS, MIN_POINTS, STREAK_BONUS_PER_LEVEL } from "./constants.js";
+import {
+  ARTIST_SHARE_BASE,
+  ARTIST_SHARE_FLOOR,
+  ARTIST_SHARE_STEP,
+  MAX_POINTS,
+  MAX_STREAK_BONUS,
+  MIN_POINTS,
+  STREAK_BONUS_PER_LEVEL,
+} from "./constants.js";
+
+/** Time-scaled points for a correct guess, before streak and rounding: 100 at the buzzer, 1000 instantly. */
+export function baseGuesserPoints(remainingMs: number, totalMs: number): number {
+  const fraction = Math.max(0, Math.min(1, remainingMs / totalMs));
+  return MIN_POINTS + (MAX_POINTS - MIN_POINTS) * fraction;
+}
 
 /** Faster correct guesses earn more points; scales linearly with time remaining. */
 export function guesserPoints(remainingMs: number, totalMs: number, streak: number): number {
-  const fraction = Math.max(0, Math.min(1, remainingMs / totalMs));
-  const base = Math.round(MIN_POINTS + (MAX_POINTS - MIN_POINTS) * fraction);
+  const base = Math.round(baseGuesserPoints(remainingMs, totalMs));
   const streakBonus = Math.min(MAX_STREAK_BONUS, streak * STREAK_BONUS_PER_LEVEL);
   return base + streakBonus;
 }
 
-export function artistPoints(correctGuesserCount: number): number {
-  return correctGuesserCount * ARTIST_POINTS_PER_GUESSER;
+/** Share of a guesser's points the artist keeps, by how many players are in the room. */
+export function artistShare(playerCount: number): number {
+  return Math.max(ARTIST_SHARE_FLOOR, ARTIST_SHARE_BASE - ARTIST_SHARE_STEP * playerCount);
+}
+
+/**
+ * The artist is paid for how well the drawing worked, not for drawing. Each solver
+ * contributes their own (streak-free) points, weighted by how early they solved: with
+ * G guessers the 1st solver counts G, the 2nd G-1 … the last 1. Someone who didn't
+ * solve contributes nothing, and always sits in the lowest-weighted slots, so one slow
+ * guesser barely dents a good artist while a drawing nobody gets earns exactly 0.
+ *
+ * `solves` is each solver's base points, in the order they solved. The weights are
+ * normalised by their total, so the most an artist can earn is `artistShare × 1000`
+ * however big the room is.
+ */
+export function artistPoints(solves: number[], guesserCount: number, playerCount: number): number {
+  const guessers = Math.max(guesserCount, solves.length);
+  if (guessers === 0 || solves.length === 0) return 0;
+  let weighted = 0;
+  solves.forEach((points, i) => {
+    weighted += (guessers - i) * points;
+  });
+  const totalWeight = (guessers * (guessers + 1)) / 2;
+  return Math.round(artistShare(playerCount) * (weighted / totalWeight));
 }
 
 export function normalizeGuess(text: string): string {

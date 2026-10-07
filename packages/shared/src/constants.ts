@@ -42,16 +42,26 @@ export const DEFAULT_PROMPT_LENGTH = 3;
 
 export const MAX_POINTS = 1000;
 export const MIN_POINTS = 100;
-export const ARTIST_POINTS_PER_GUESSER = 120;
 export const STREAK_BONUS_PER_LEVEL = 25;
 export const MAX_STREAK_BONUS = 150;
+/**
+ * The artist's cut of a guesser's points shrinks as the room grows: 0.90 at 2 players,
+ * 0.85 at 3 … down to a 0.70 floor from 6 players. Near 1.0 the artist has no reason to
+ * sandbag a two-player game; at the floor a lone lucky guess can't pay the artist much.
+ */
+export const ARTIST_SHARE_BASE = 1;
+export const ARTIST_SHARE_STEP = 0.05;
+export const ARTIST_SHARE_FLOOR = 0.7;
 
 export const MAX_GUESS_LENGTH = 40;
 export const MAX_NICKNAME_LENGTH = 16;
 export const MAX_CHAT_HISTORY = 60;
 
 export const ROOM_IDLE_EXPIRY_MS = 1000 * 60 * 30;
-export const RECONNECT_GRACE_MS = 1000 * 45;
+export const RECONNECT_GRACE_MS = 1000 * 60;
+/** A host who stays offline this long hands the room over, so nobody waits on a ghost. */
+export const HOST_HANDOFF_MS = 1000 * 15;
+export const MAX_SPECTATORS = 20;
 
 /** Name colors in chat/feeds — all dark enough to read on white paper. */
 export const AVATAR_COLORS = [

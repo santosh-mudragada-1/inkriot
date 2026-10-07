@@ -1,6 +1,8 @@
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
+import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { audio } from "../../lib/audio/AudioManager";
+import { HowScoringModal } from "./HowScoringModal";
 import "./SoundToggle.css";
 
 const subscribe = (fn: () => void) => audio.subscribe(fn);
@@ -9,8 +11,33 @@ export function SoundToggle() {
   const sfx = useSyncExternalStore(subscribe, () => audio.isEnabled());
   const music = useSyncExternalStore(subscribe, () => audio.isMusicEnabled());
 
+  const onHome = useLocation().pathname === "/";
+  const [helpOpen, setHelpOpen] = useState(false);
+
   return (
     <div className="sound-dock">
+      {onHome && (
+        <>
+          <motion.button
+            type="button"
+            className="sound-toggle is-on"
+            aria-label="How scoring works"
+            title="How scoring works"
+            whileTap={{ scale: 0.85 }}
+            whileHover={{ rotate: -8 }}
+            onClick={() => {
+              audio.playToggle();
+              setHelpOpen(true);
+            }}
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 9a3 3 0 1 1 4.2 2.7c-.8.4-1.2 1-1.2 1.8" />
+              <circle cx="12" cy="17.5" r="0.8" fill="currentColor" />
+            </svg>
+          </motion.button>
+          <HowScoringModal open={helpOpen} onClose={() => setHelpOpen(false)} />
+        </>
+      )}
       <motion.button
         type="button"
         className={`sound-toggle ${music ? "is-on" : ""}`}

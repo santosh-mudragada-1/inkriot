@@ -17,10 +17,12 @@ import {
   GameSettingsUpdate,
   GamePhase,
   GuessMessage,
+  HOST_HANDOFF_MS,
   MAX_CHAT_HISTORY,
   MAX_GUESS_LENGTH,
   MAX_NICKNAME_LENGTH,
   MAX_PLAYERS_PER_ROOM,
+  MAX_SPECTATORS,
   MIN_PLAYERS_PER_ROOM,
   LOBBY_WALL_MAX_OPS,
   Player,
@@ -31,11 +33,14 @@ import {
   RoomSnapshot,
   SCOREBOARD_SECONDS,
   ServerToClientEvents,
+  Spectator,
+  TurnOutcome,
   WORD_CHOICE_COUNT,
   PROMPT_LENGTH_OPTIONS,
   RECENT_WORDS_MEMORY,
   WORD_SELECTION_SECONDS,
   artistPoints,
+  baseGuesserPoints,
   buildHintPattern,
   chooseHintIndices,
   guesserPoints,
@@ -52,6 +57,11 @@ interface InternalPlayer extends Player {
   wrongGuessesThisRound: number;
 }
 
+interface InternalSpectator extends Spectator {
+  socketId: string | null;
+  sessionId: string;
+}
+
 interface ArtistTurnStats {
   artistId: string;
   drawOpCount: number;
@@ -64,6 +74,9 @@ export class Room {
   code: string;
   io: IOServer;
   players = new Map<string, InternalPlayer>();
+  /** Watchers of a game that started before they arrived; promoted to players when the room returns to the lobby. */
+  spectators = new Map<string, InternalSpectator>();
+  /** Session -> id, for both players and spectators. */
   sessionToPlayer = new Map<string, string>();
   hostId: string | null = null;
   phase: GamePhase = "LOBBY";
@@ -96,6 +109,13 @@ export class Room {
   private fastestGuess: { playerId: string; ms: number } | null = null;
   private mostWrongGuesses: { playerId: string; count: number } | null = null;
   private scoreAtRoundOneEnd = new Map<string, number>();
+  /** This turn's correct guesses in the order they landed, with their streak-free base points. */
+  private solves: { playerId: string; base: number }[] = [];
+  /** Guessers who were offline at any point this turn: not counted against the artist's pay (they still lose their streak). */
+  private offlineThisTurn = new Set<string>();
+  private turnOutcome: TurnOutcome | null = null;
+  private skipVotes = new Set<string>();
+  private hostHandoffTimer: NodeJS.Timeout | null = null;
   private onEmpty: () => void;
 
   constructor(code: string, io: IOServer, onEmpty: () => void) {
@@ -113,13 +133,21 @@ export class Room {
     return AVATAR_COLORS.find((c) => !used.has(c)) ?? AVATAR_COLORS[this.players.size % AVATAR_COLORS.length];
   }
 
-  addPlayer(nickname: string, socketId: string, avatar?: string): { playerId: string; sessionId: string } | { error: string } {
+  addPlayer(
+    nickname: string,
+    socketId: string,
+    avatar?: string,
+  ): { playerId: string; sessionId: string; spectator?: boolean } | { error: string } {
     this.touch();
-    if (this.players.size >= this.maxPlayers) return { error: "Room is full." };
-    if (this.phase !== "LOBBY") return { error: "Game already in progress." };
+    const inGame = this.phase !== "LOBBY";
+    if (!inGame && this.players.size >= this.maxPlayers) return { error: "Room is full." };
+    if (inGame && this.spectators.size >= MAX_SPECTATORS) return { error: "This room already has a full crowd watching." };
 
     const cleanName = nickname.trim().slice(0, MAX_NICKNAME_LENGTH) || "Player";
-    const existingNames = new Set(Array.from(this.players.values()).map((p) => p.name.toLowerCase()));
+    const existingNames = new Set([
+      ...Array.from(this.players.values()).map((p) => p.name.toLowerCase()),
+      ...Array.from(this.spectators.values()).map((p) => p.name.toLowerCase()),
+    ]);
     let finalName = cleanName;
     let suffix = 2;
     while (existingNames.has(finalName.toLowerCase())) {
@@ -128,6 +156,19 @@ export class Room {
 
     const playerId = nanoid(10);
     const sessionId = nanoid(21);
+    if (inGame) {
+      this.spectators.set(playerId, {
+        id: playerId,
+        name: finalName,
+        color: this.nextColor(),
+        avatar: typeof avatar === "string" && AVATAR_PATTERN.test(avatar) ? avatar : "",
+        connected: true,
+        socketId,
+        sessionId,
+      });
+      this.sessionToPlayer.set(sessionId, playerId);
+      return { playerId, sessionId, spectator: true };
+    }
     const isHost = this.players.size === 0;
     const player: InternalPlayer = {
       id: playerId,
@@ -154,37 +195,92 @@ export class Room {
     const playerId = this.sessionToPlayer.get(sessionId);
     if (!playerId) return { error: "Session not found." };
     const player = this.players.get(playerId);
-    if (!player) return { error: "Session not found." };
-    player.connected = true;
-    player.socketId = socketId;
+    const spectator = this.spectators.get(playerId);
+    if (!player && !spectator) return { error: "Session not found." };
+    if (player) {
+      player.connected = true;
+      player.socketId = socketId;
+    } else if (spectator) {
+      spectator.connected = true;
+      spectator.socketId = socketId;
+    }
     const timer = this.disconnectTimers.get(playerId);
     if (timer) {
       clearTimeout(timer);
       this.disconnectTimers.delete(playerId);
     }
+    if (this.hostId === playerId && this.hostHandoffTimer) {
+      clearTimeout(this.hostHandoffTimer);
+      this.hostHandoffTimer = null;
+    }
+    // The artist is back, or the set of voters changed; the caller broadcasts afterwards.
+    this.checkSkipVote(false);
     this.touch();
     return { playerId };
   }
 
   markDisconnected(playerId: string) {
+    const spectator = this.spectators.get(playerId);
     const player = this.players.get(playerId);
-    if (!player) return;
-    player.connected = false;
-    player.socketId = null;
-    this.broadcastState();
+    if (!player && !spectator) return;
+    if (player) {
+      player.connected = false;
+      player.socketId = null;
+      if (this.phase === "WORD_SELECTION" || this.phase === "DRAWING") this.offlineThisTurn.add(playerId);
+      if (this.hostId === playerId) {
+        if (this.hostHandoffTimer) clearTimeout(this.hostHandoffTimer);
+        this.hostHandoffTimer = setTimeout(() => this.handOffHost(playerId), HOST_HANDOFF_MS);
+      }
+    } else if (spectator) {
+      spectator.connected = false;
+      spectator.socketId = null;
+    }
 
     const timer = setTimeout(() => this.removePlayer(playerId), RECONNECT_GRACE_MS);
     this.disconnectTimers.set(playerId, timer);
+    this.checkSkipVote(false);
+    this.broadcastState();
+  }
+
+  /** A host who stays offline hands the room to someone present; if they come back they're a regular player. */
+  private handOffHost(fromId: string) {
+    this.hostHandoffTimer = null;
+    const from = this.players.get(fromId);
+    if (this.hostId !== fromId || !from || from.connected) return;
+    const next = Array.from(this.players.values()).find((p) => p.connected && p.id !== fromId);
+    if (!next) return;
+    from.isHost = false;
+    next.isHost = true;
+    this.hostId = next.id;
+    this.broadcastState();
   }
 
   removePlayer(playerId: string) {
+    const timer = this.disconnectTimers.get(playerId);
+    if (timer) clearTimeout(timer);
+    this.disconnectTimers.delete(playerId);
+
+    const spectator = this.spectators.get(playerId);
+    if (spectator) {
+      this.spectators.delete(playerId);
+      this.sessionToPlayer.delete(spectator.sessionId);
+      this.broadcastState();
+      return;
+    }
+
     const player = this.players.get(playerId);
     if (!player) return;
-    this.disconnectTimers.get(playerId) && clearTimeout(this.disconnectTimers.get(playerId)!);
-    this.disconnectTimers.delete(playerId);
     this.players.delete(playerId);
     this.sessionToPlayer.delete(player.sessionId);
     this.artistOrder = this.artistOrder.filter((id) => id !== playerId);
+    this.skipVotes.delete(playerId);
+    if (this.hostId === playerId && this.hostHandoffTimer) {
+      clearTimeout(this.hostHandoffTimer);
+      this.hostHandoffTimer = null;
+    }
+
+    // Everyone seated left but people are still watching: they take over the room.
+    if (this.players.size === 0 && this.spectators.size > 0) this.resetToLobby();
 
     if (this.players.size === 0) {
       this.clearPhaseTimer();
@@ -199,12 +295,93 @@ export class Room {
       next.isHost = true;
     }
 
+    const inGame = this.phase !== "LOBBY" && this.phase !== "GAME_COMPLETE";
+    if (inGame && this.players.size < MIN_PLAYERS_PER_ROOM) {
+      this.addSystemMessage("Everyone else left — back to the lobby.");
+      this.resetToLobby();
+      return;
+    }
+
     if (this.artistId === playerId && (this.phase === "DRAWING" || this.phase === "WORD_SELECTION")) {
       this.addSystemMessage(`${player.name} left mid-turn — skipping to next round.`);
+      this.clearPhaseTimer();
+      this.endRound("artist_left");
+    } else if (this.phase === "DRAWING" && this.everyoneGuessedOrArtistOnly()) {
+      this.clearPhaseTimer();
       this.endRound();
     } else {
+      this.checkSkipVote(false);
       this.broadcastState();
     }
+  }
+
+  /** Spectators of the finished game sit down as players, as long as there are seats. */
+  private promoteSpectators() {
+    for (const spectator of Array.from(this.spectators.values())) {
+      if (this.players.size >= this.maxPlayers) break;
+      this.spectators.delete(spectator.id);
+      const player: InternalPlayer = {
+        id: spectator.id,
+        name: spectator.name,
+        color: spectator.color,
+        avatar: spectator.avatar,
+        score: 0,
+        isHost: false,
+        connected: spectator.connected,
+        streak: 0,
+        hasGuessedCorrectly: false,
+        lastGuessMs: null,
+        socketId: spectator.socketId,
+        sessionId: spectator.sessionId,
+        wrongGuessesThisRound: 0,
+      };
+      this.players.set(player.id, player);
+    }
+    if (!this.hostId || !this.players.has(this.hostId)) {
+      const next = Array.from(this.players.values()).find((p) => p.connected) ?? Array.from(this.players.values())[0];
+      if (next) {
+        next.isHost = true;
+        this.hostId = next.id;
+      }
+    }
+  }
+
+  /**
+   * The artist is offline mid-turn: guessers who are online can vote to skip. Once every
+   * online guesser has said yes the turn is skipped — no points, no streaks lost.
+   */
+  private skipVoteOpen(): boolean {
+    const artist = this.artistId ? this.players.get(this.artistId) : null;
+    return !!artist && !artist.connected && (this.phase === "WORD_SELECTION" || this.phase === "DRAWING");
+  }
+
+  private skipVoters(): InternalPlayer[] {
+    return Array.from(this.players.values()).filter((p) => p.id !== this.artistId && p.connected);
+  }
+
+  voteSkipArtist(playerId: string) {
+    if (!this.skipVoteOpen()) return;
+    if (!this.skipVoters().some((p) => p.id === playerId)) return;
+    this.skipVotes.add(playerId);
+    this.touch();
+    this.checkSkipVote(true);
+  }
+
+  private checkSkipVote(broadcast: boolean) {
+    if (!this.skipVoteOpen()) {
+      this.skipVotes.clear();
+      return;
+    }
+    const voters = this.skipVoters();
+    for (const id of Array.from(this.skipVotes)) if (!voters.some((p) => p.id === id)) this.skipVotes.delete(id);
+    if (voters.length > 0 && voters.every((p) => this.skipVotes.has(p.id))) {
+      const artist = this.artistId ? this.players.get(this.artistId) : null;
+      this.addSystemMessage(`${artist?.name ?? "The artist"} was offline — turn skipped.`);
+      this.clearPhaseTimer();
+      this.endRound("skipped");
+      return;
+    }
+    if (broadcast) this.broadcastState();
   }
 
   isHost(playerId: string) {
@@ -284,6 +461,10 @@ export class Room {
     this.wordChoices = pickRandomWords(WORD_CHOICE_COUNT, seen, this.gameMode, this.maxPromptWords);
     this.canvasOps = [];
     this.guesses = [];
+    this.solves = [];
+    this.turnOutcome = null;
+    this.skipVotes.clear();
+    this.offlineThisTurn = new Set(Array.from(this.players.values()).filter((p) => !p.connected).map((p) => p.id));
     for (const p of this.players.values()) {
       p.hasGuessedCorrectly = false;
       p.wrongGuessesThisRound = 0;
@@ -362,6 +543,9 @@ export class Room {
     for (const p of this.players.values()) {
       if (p.id !== playerId && p.socketId) this.io.to(p.socketId).emit("draw_op", op);
     }
+    for (const w of this.spectators.values()) {
+      if (w.socketId) this.io.to(w.socketId).emit("draw_op", op);
+    }
   }
 
   /**
@@ -414,6 +598,7 @@ export class Room {
       const points = guesserPoints(remainingMs, drawMs, player.streak);
       player.score += points;
       player.lastGuessMs = drawMs - remainingMs;
+      this.solves.push({ playerId, base: baseGuesserPoints(remainingMs, drawMs) });
 
       if (!this.fastestGuess || player.lastGuessMs < this.fastestGuess.ms) {
         this.fastestGuess = { playerId, ms: player.lastGuessMs };
@@ -431,7 +616,7 @@ export class Room {
         this.broadcastState();
       }
     } else {
-      player.streak = 0;
+      // A wrong guess never costs the streak — it only breaks if you miss the word entirely.
       player.wrongGuessesThisRound++;
       if (!this.mostWrongGuesses || player.wrongGuessesThisRound > this.mostWrongGuesses.count) {
         this.mostWrongGuesses = { playerId, count: player.wrongGuessesThisRound };
@@ -474,17 +659,42 @@ export class Room {
     this.io.to(this.code).emit("reaction", { id: nanoid(6), playerId, emoji, createdAt: Date.now() });
   }
 
-  private endRound() {
+  /**
+   * `voided` turns (offline artist skipped by vote, or the artist left) pay nobody and
+   * cost nobody a streak. Otherwise the artist is paid from how the guessers did, and a
+   * guesser who missed the word loses their streak (offline or not) — unless nobody got
+   * it, which is on the artist.
+   */
+  private endRound(voided?: "skipped" | "artist_left") {
     if (this.phase === "ROUND_REVEAL" || this.phase === "SCOREBOARD") return;
     this.clearHintTimers();
     this.drawStartsAt = null;
-    const artist = this.artistId ? this.players.get(this.artistId) : null;
-    const stats = this.turnStats[this.turnStats.length - 1];
-    if (artist && stats) {
-      const points = artistPoints(stats.correctGuesserCount);
-      artist.score += points;
-      if (points > 0) {
-        this.io.to(this.code).emit("score_popup", { id: nanoid(6), playerId: artist.id, amount: points, createdAt: Date.now() });
+    this.skipVotes.clear();
+
+    if (voided) {
+      this.turnOutcome = voided;
+    } else {
+      const solvedIds = new Set(this.solves.map((s) => s.playerId));
+      const missed = Array.from(this.players.values()).filter((p) => p.id !== this.artistId && !solvedIds.has(p.id));
+      // Missing the word costs the streak whether you were offline or not, so dropping the
+      // connection can't protect it. Only the artist's pay ignores people who were offline.
+      const countedAgainstArtist = missed.filter((p) => !this.offlineThisTurn.has(p.id));
+      if (this.solves.length === 0) {
+        this.turnOutcome = "artist_fault";
+      } else {
+        for (const p of missed) p.streak = 0;
+        const artist = this.artistId ? this.players.get(this.artistId) : null;
+        if (artist) {
+          const points = artistPoints(
+            this.solves.map((s) => s.base),
+            this.solves.length + countedAgainstArtist.length,
+            this.players.size,
+          );
+          artist.score += points;
+          if (points > 0) {
+            this.io.to(this.code).emit("score_popup", { id: nanoid(6), playerId: artist.id, amount: points, createdAt: Date.now() });
+          }
+        }
       }
     }
     this.setPhase("ROUND_REVEAL", ROUND_REVEAL_SECONDS * 1000, () => {
@@ -583,6 +793,10 @@ export class Room {
 
   playAgain(playerId: string) {
     if (!this.isHost(playerId)) return;
+    this.resetToLobby();
+  }
+
+  private resetToLobby() {
     this.clearPhaseTimer();
     this.clearHintTimers();
     this.hintRevealedIndices.clear();
@@ -595,6 +809,9 @@ export class Room {
     this.wordChoices = null;
     this.canvasOps = [];
     this.guesses = [];
+    this.solves = [];
+    this.turnOutcome = null;
+    this.skipVotes.clear();
     this.awards = null;
     this.phaseEndsAt = null;
     this.scoreAtRoundOneEnd.clear();
@@ -603,6 +820,7 @@ export class Room {
       p.streak = 0;
       p.hasGuessedCorrectly = false;
     }
+    this.promoteSpectators();
     this.broadcastState();
   }
 
@@ -629,6 +847,8 @@ export class Room {
   }
 
   getSnapshot(forPlayerId: string): RoomSnapshot {
+    const open = this.skipVoteOpen();
+    const voters = open ? this.skipVoters() : [];
     const isArtist = forPlayerId === this.artistId;
     const solved = this.phase === "DRAWING" && !!this.players.get(forPlayerId)?.hasGuessedCorrectly;
     const revealArtist = this.phase === "ROUND_REVEAL" || this.phase === "SCOREBOARD" || this.phase === "GAME_COMPLETE";
@@ -656,6 +876,18 @@ export class Room {
         maxPromptWords: this.maxPromptWords,
       },
       hintPattern: this.phase === "DRAWING" && this.currentWord ? buildHintPattern(this.currentWord, this.hintRevealedIndices) : null,
+      turnOutcome: this.phase === "ROUND_REVEAL" || this.phase === "SCOREBOARD" ? this.turnOutcome : null,
+      skipVote: open
+        ? {
+            artistName: (this.artistId && this.players.get(this.artistId)?.name) || "The artist",
+            votes: this.skipVotes.size,
+            needed: voters.length,
+            youVoted: this.skipVotes.has(forPlayerId),
+            youCanVote: voters.some((p) => p.id === forPlayerId),
+          }
+        : null,
+      spectators: Array.from(this.spectators.values()).map(({ socketId, sessionId, ...w }) => w),
+      viewerRole: this.spectators.has(forPlayerId) ? "spectator" : "player",
     };
   }
 
@@ -664,6 +896,9 @@ export class Room {
       if (player.socketId) {
         this.io.to(player.socketId).emit("room_state", this.getSnapshot(player.id));
       }
+    }
+    for (const watcher of this.spectators.values()) {
+      if (watcher.socketId) this.io.to(watcher.socketId).emit("room_state", this.getSnapshot(watcher.id));
     }
   }
 

@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import "./PaperDoodles.css";
 
-function Star({ color }: { color: string }) {
+export function Star({ color }: { color: string }) {
   return (
     <svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2.5c.6 3.4 1.6 6 3.3 7.8 1.8 1.8 4.3 2.7 7.7 3.2-3.4.6-6 1.6-7.7 3.3-1.8 1.8-2.7 4.3-3.3 7.7-.5-3.4-1.5-6-3.2-7.7-1.8-1.8-4.4-2.7-7.8-3.3 3.4-.5 6-1.5 7.8-3.2 1.7-1.8 2.7-4.4 3.2-7.8Z" />
@@ -9,7 +9,7 @@ function Star({ color }: { color: string }) {
   );
 }
 
-function Squiggle({ color }: { color: string }) {
+export function Squiggle({ color }: { color: string }) {
   return (
     <svg viewBox="0 0 60 20" width="100%" height="100%" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round">
       <path d="M2 14c5-10 9-10 14 0s9 10 14 0 9-10 14 0 9 10 14 0" />
@@ -17,7 +17,7 @@ function Squiggle({ color }: { color: string }) {
   );
 }
 
-function Loop({ color }: { color: string }) {
+export function Loop({ color }: { color: string }) {
   return (
     <svg viewBox="0 0 40 40" width="100%" height="100%" fill="none" stroke={color} strokeWidth="3">
       <path d="M20 6c9 0 14 5.5 14 12s-6 12-14 12S6 24.5 6 18c0-4.6 3-8.5 8-10.5" strokeLinecap="round" />
@@ -25,7 +25,7 @@ function Loop({ color }: { color: string }) {
   );
 }
 
-function PaintStroke({ color }: { color: string }) {
+export function PaintStroke({ color }: { color: string }) {
   return (
     <svg viewBox="0 0 50 16" width="100%" height="100%">
       <path d="M2 9c6-6 12-8 20-7 10 1.3 18 4 26 2-5 6-13 9-23 8C15 11 8 12 2 9Z" fill={color} />
@@ -33,7 +33,7 @@ function PaintStroke({ color }: { color: string }) {
   );
 }
 
-function Dot({ color }: { color: string }) {
+export function Dot({ color }: { color: string }) {
   return (
     <svg viewBox="0 0 10 10" width="100%" height="100%">
       <circle cx="5" cy="5" r="4.2" fill={color} />
