@@ -34,6 +34,35 @@ export const WORDS_BY_DIFFICULTY = {
     "sword", "shield", "bow", "arrow", "flag", "map", "coin", "diamond", "magnet", "battery",
     "tv", "computer", "camera", "radio", "headphones", "light bulb", "fan", "bridge", "tower", "igloo",
     "snowflake", "lightning", "tornado", "feather", "nest", "web", "teddy bear", "doll", "yo-yo",
+    // more animals
+    "goat", "donkey", "puppy", "kitten", "hamster", "goldfish", "otter", "polar bear", "seagull", "crow",
+    "pigeon", "lamb", "chick", "rooster", "turkey", "ostrich", "bull", "pony", "fly", "beetle",
+    "moth", "tadpole", "clam", "oyster", "mole",
+    // more food
+    "tomato", "potato", "onion", "garlic", "chili", "cucumber", "eggplant", "peach", "plum", "kiwi",
+    "mango", "blueberry", "lime", "olive", "peanut", "honey", "jam", "butter", "soup", "salad",
+    "rice", "steak", "sausage", "bacon", "pie", "muffin", "brownie", "jelly", "pudding", "cereal",
+    "juice", "coffee", "lemonade", "marshmallow", "toast", "chicken leg", "apple pie", "banana split", "ice cube", "cup of tea",
+    "pizza box", "candy bar",
+    // around the house
+    "pillow", "blanket", "towel", "soap", "sponge", "box", "basket", "jar", "bowl", "pot",
+    "pan", "kettle", "oven", "stove", "remote", "keyboard", "laptop", "watch", "wallet", "purse",
+    "belt", "tie", "dress", "skirt", "pants", "jacket", "coat", "boot", "sandal", "glove",
+    "mask", "helmet", "wig", "crayon", "marker", "eraser", "ruler", "notebook", "envelope", "stamp",
+    "paper clip", "tape", "glue", "easel", "globe", "desk", "shelf", "stairs", "fence", "gate",
+    "roof", "chimney", "brick", "rope", "chain", "nail", "screw", "wrench", "drill", "wheel",
+    "tire", "van", "ship", "raft", "wagon", "cart", "dice", "puzzle", "marble", "whistle",
+    "flute", "doorbell", "doorknob", "toothpaste", "lipstick", "teacup", "spaceship", "flower pot", "rain boots", "beach ball",
+    "soccer ball", "basketball", "tennis ball", "baseball bat", "race car", "toy car", "magic wand", "witch hat", "water gun", "train track",
+    "bus stop", "fish hook", "christmas tree", "music note", "baby bottle",
+    // outdoors
+    "grass", "bush", "rock", "hill", "lake", "pond", "planet", "earth", "comet", "icicle",
+    "branch", "log", "pine cone", "daisy", "rain cloud", "sunrise", "forest", "pebble", "sandbox",
+    // body & people
+    "mouth", "lips", "tongue", "hair", "beard", "mustache", "finger", "thumb", "arm", "leg",
+    "knee", "toe", "brain", "skeleton", "footprint", "baby", "princess", "prince", "angel", "devil",
+    "monster", "giant", "elf", "school", "hospital", "farm", "zoo", "park", "road", "hut",
+    "garage", "question mark", "peace sign", "dollar sign", "check mark", "thumbs up",
   ],
   medium: [
     // animals with a twist / less common
@@ -64,6 +93,56 @@ export const WORDS_BY_DIFFICULTY = {
     "waterfall", "glacier", "iceberg", "cave", "desert", "oasis", "jungle", "swamp", "canyon", "coral reef",
     "sunflower", "rose", "tulip", "cherry blossom", "bonsai", "venus flytrap", "pine tree", "acorn", "four leaf clover", "full moon",
     "sunset", "thunderstorm", "hailstorm", "puddle", "campfire", "log cabin", "hammock", "sandstorm", "meteor",
+    // more creatures
+    "hummingbird", "woodpecker", "platypus", "anteater", "lemur", "meerkat", "badger", "bison", "yak", "hyena",
+    "orangutan", "iguana", "salamander", "piranha", "eel", "manatee", "orca", "swordfish", "hammerhead shark", "clownfish",
+    "sea urchin", "sea turtle", "hermit crab", "slug", "centipede", "grasshopper", "firefly", "wasp", "praying mantis", "cockroach",
+    "dalmatian", "poodle", "guinea pig", "puffin", "dodo", "phoenix", "griffin", "centaur", "pegasus", "cyclops",
+    "kraken", "goblin", "troll", "ogre", "gnome", "leprechaun", "tooth fairy", "easter bunny", "santa claus", "grim reaper",
+    "frankenstein", "cupid", "t-rex", "stegosaurus", "pterodactyl", "woolly mammoth", "sabertooth tiger", "mosquito bite", "sea monster",
+    // people & jobs
+    "pilot", "nurse", "dentist", "farmer", "baker", "plumber", "scientist", "detective", "spy", "judge",
+    "sailor", "cheerleader", "ballerina", "goalie", "waiter", "barber", "photographer", "construction worker", "caveman", "viking",
+    "samurai", "gladiator", "pharaoh", "rock star", "bride", "jester", "sumo wrestler", "bodybuilder", "shepherd", "blacksmith",
+    "acrobat", "puppeteer", "juggler", "tourist", "hitchhiker", "babysitter", "mail truck", "paramedic", "janitor",
+    // more food
+    "pickle", "cabbage", "celery", "radish", "asparagus", "chili pepper", "pomegranate", "dragon fruit", "kebab", "samosa",
+    "lasagna", "ravioli", "omelette", "churro", "cheesecake", "macaron", "gummy bear", "caramel apple", "spring roll", "fried chicken",
+    "chicken nugget", "fish sticks", "hot chocolate", "bubble gum", "ketchup", "mustard", "sugar cube", "wedding cake", "food truck", "vending machine",
+    "gumball machine", "cash register", "shopping cart", "price tag", "cupcake tower", "popcorn bucket", "tea bag", "ice pop", "pizza oven", "sushi roll",
+    // things
+    "suitcase", "briefcase", "padlock", "keyhole", "hanger", "clothespin", "ironing board", "washing machine", "vacuum cleaner", "can opener",
+    "corkscrew", "whisk", "ladle", "spatula", "grater", "cutting board", "chopsticks", "oven mitt", "apron", "chef hat",
+    "screwdriver", "pliers", "chainsaw", "toolbox", "tape measure", "paint roller", "pickaxe", "rake", "pitchfork", "watering can",
+    "garden hose", "lawn mower", "sprinkler", "birdhouse", "bird feeder", "greenhouse", "printer", "smartwatch", "plug", "satellite",
+    "satellite dish", "antenna", "drone", "vr headset", "selfie stick", "floppy disk", "cassette tape", "vinyl record", "record player", "walkie talkie",
+    "rotary phone", "jukebox", "arcade machine", "pinball machine", "slot machine", "robot vacuum", "light switch", "ceiling fan", "air conditioner", "fire extinguisher",
+    "first aid kit", "band aid", "thermometer", "crutches", "wheelchair", "hair dryer", "perfume", "nail polish", "bubble bath", "laundry basket",
+    "clothesline", "sewing machine", "needle", "ball of yarn", "button", "zipper", "safety pin", "curtain", "bookshelf", "wardrobe",
+    "cuckoo clock", "grandfather clock", "picture frame", "vase", "lantern", "pencil sharpener", "stapler", "sticky note", "thumbtack", "clipboard",
+    "filing cabinet", "abacus", "test tube", "beaker", "report card", "diploma", "graduation cap", "locker", "chalkboard", "spray paint",
+    "paint palette", "tripod", "quill", "scroll", "cauldron", "potion", "dreamcatcher", "wind chime", "rocking horse", "music box",
+    // getting around
+    "limousine", "pickup truck", "monster truck", "tow truck", "garbage truck", "cement mixer", "bulldozer", "excavator", "forklift", "steamroller",
+    "tank", "jet ski", "speedboat", "rowboat", "kayak", "cruise ship", "steam train", "bullet train", "cable car", "ski lift",
+    "unicycle", "tricycle", "tandem bike", "go kart", "golf cart", "chariot", "blimp", "jetpack", "rickshaw", "double decker bus",
+    // places
+    "kitchen", "library", "gas station", "car wash", "airport", "pier", "aquarium", "stadium", "jail", "factory",
+    "dam", "tunnel", "crosswalk", "movie theater", "bowling alley", "ice rink", "skate park", "water park", "graveyard", "drawbridge",
+    "moat", "pagoda", "colosseum", "tree stump", "campsite", "train station", "rooftop", "attic",
+    // sports & play
+    "football", "tennis racket", "ping pong", "hockey stick", "golf club", "baseball glove", "boxing gloves", "bowling ball", "target", "trophy",
+    "medal", "podium", "finish line", "hurdle", "dumbbell", "treadmill", "yoga mat", "punching bag", "scoreboard", "frisbee",
+    "boomerang", "pogo stick", "slingshot", "water balloon", "life jacket", "snorkel", "flippers", "pinata", "confetti",
+    // clothes & music
+    "tuxedo", "wedding dress", "tiara", "cape", "overalls", "hoodie", "sweater", "poncho", "sombrero", "beanie",
+    "beret", "cowboy hat", "hard hat", "earmuffs", "bandana", "eye patch", "monocle", "suspenders", "tutu", "swimsuit",
+    "slippers", "electric guitar", "banjo", "ukulele", "cello", "tuba", "harmonica", "bagpipes", "maracas", "tambourine",
+    "gong", "drum kit", "conductor", "music stand", "boxing ring", "crowbar", "sledgehammer", "spinning top",
+    // nature & seasons
+    "blizzard", "flood", "crescent moon", "saturn", "asteroid", "cliff", "bamboo", "maple leaf", "pearl", "seaweed",
+    "lily pad", "dandelion", "tumbleweed", "sand dune", "geyser", "hot spring", "crystal", "gold bar", "fossil", "anthill",
+    "cocoon", "snow angel", "jack o lantern", "easter egg", "gingerbread house", "stocking", "wreath", "solar panel", "wind turbine",
   ],
   hard: [
     // scenes & situations
@@ -86,6 +165,35 @@ export const WORDS_BY_DIFFICULTY = {
     "periscope", "stethoscope", "catapult", "sundial", "gondola", "origami", "trebuchet", "kaleidoscope", "metronome", "pendulum",
     "scuba diver", "lumberjack", "ventriloquist", "mime", "magician", "archaeologist", "beekeeper", "lifeguard", "zookeeper", "referee",
     "hibernating bear", "migrating birds", "shedding snake", "hatching egg", "sprouting seed", "melting snowman", "exploding volcano", "sinking ship", "crash landing",
+    // tricky nouns
+    "weathervane", "anvil", "gargoyle", "aqueduct", "gramophone", "inkwell", "wax seal", "hieroglyphics", "sarcophagus", "battering ram",
+    "suit of armor", "crossbow", "cannon", "spellbook", "marionette", "chimney sweep", "trapeze artist", "human cannonball", "lion tamer", "fire breather",
+    "sword swallower", "mad scientist", "lab coat", "robot arm", "dinosaur skeleton", "mars rover", "moon base", "space shuttle", "solar system", "rocket launch",
+    "atom", "dna", "lightning rod", "food chain", "water cycle", "evolution", "recycling", "oil rig", "hologram", "x-ray",
+    "shadow", "reflection", "mirage", "eclipse", "orbit", "constellation", "galaxy", "stalactite",
+    // landmarks
+    "taj mahal", "big ben", "mount rushmore", "mount everest", "niagara falls", "grand canyon", "easter island", "sydney opera house", "golden gate bridge",
+    // scenes
+    "birthday party", "road trip", "bank robbery", "alien invasion", "space walk", "moon landing", "desert island", "shipwreck", "treasure hunt", "sleepover",
+    "pillow fort", "food fight", "rush hour", "fire drill", "fashion show", "talent show", "magic show", "puppet show", "rock concert", "marching band",
+    "air guitar", "flash mob", "conga line", "red carpet", "standing ovation", "game show", "weather forecast", "paparazzi", "autograph", "video call",
+    "low battery", "computer virus", "power outage", "dead end", "u-turn", "speed bump", "speeding ticket", "empty fridge", "messy room", "broken heart",
+    "love letter", "brainstorm", "sunburn", "goosebumps", "haunted castle", "underwater city", "floating island", "upside down house", "two headed dragon", "ghost town",
+    // actions
+    "laughing", "crying", "whispering", "tiptoeing", "sweating", "shivering", "daydreaming", "eavesdropping", "meditating", "stretching",
+    "sprinting", "jogging", "climbing", "rowing", "swimming", "diving", "paragliding", "rock climbing", "horse riding", "bowling",
+    "boxing", "fencing", "weightlifting", "archery", "yoga", "breakdancing", "ballet", "whistling", "singing", "ironing",
+    "vacuuming", "sweeping", "washing dishes", "doing laundry", "mowing the lawn", "raking leaves", "planting a tree", "watering plants", "feeding the ducks", "milking a cow",
+    "flying a kite", "riding a horse", "riding a camel", "climbing a tree", "skipping stones", "making a wish", "blowing out candles", "opening a present", "wrapping a gift", "popping a balloon",
+    "carving a pumpkin", "reading a book", "writing a letter", "taking a nap", "taking a bath", "getting a haircut", "losing a tooth", "stubbing a toe", "missing the bus", "waiting in line",
+    "hailing a taxi", "changing a tire", "parallel parking", "painting a fence", "digging a hole", "burying treasure", "walking the plank", "sword fighting", "casting a spell", "counting sheep",
+    "wheelie", "kickflip", "slam dunk", "hole in one", "home run", "penalty kick", "touchdown", "photo finish", "relay race", "sack race",
+    "three legged race", "duck duck goose", "leapfrog", "hopscotch", "cat nap", "bear hug", "chicken dance", "crocodile tears", "sneezing elephant", "sleeping giant",
+    // funny combos
+    "cat burglar", "couch potato", "hot potato", "night owl", "early bird", "bookworm", "copycat", "dog walker", "dancing robot", "robot dog",
+    "alien tourist", "pirate parrot", "space cowboy", "tiny elephant", "snail mail", "octopus chef", "shark attack", "cow jumping", "skateboarding dog", "surfing cat",
+    "nervous ghost", "lazy dragon", "flying carpet", "singing fish", "invisible man", "headless horseman", "sleepy owl", "vampire dentist", "superhero cape", "villain laugh",
+    "evil twin", "secret agent", "getaway car", "crime scene", "footprints in snow", "rain dance",
   ],
 } as const;
 
@@ -128,22 +236,32 @@ function sample(source: readonly string[], count: number): string[] {
  * mode). `maxWords` caps how long a prompt's phrase can be (1/2/3 words); choices
  * naturally end up a mix of shorter and longer prompts up to that cap.
  *
- * `exclude` holds words this room has already seen (this game and recent games).
- * If excluding them leaves too few, recently-seen words are allowed back in before
- * the difficulty/length filters are relaxed — the host's settings matter more than
- * novelty. Difficulty wins over the length cap if the two can't both be satisfied.
+ * `seen` lists words this room has already shown, oldest first. Unseen words are
+ * always preferred; if there aren't enough, the *longest-ago* seen words come back
+ * before anything recent — the host's settings matter more than novelty. Difficulty
+ * wins over the length cap if the two can't both be satisfied.
  */
 export function pickRandomWords(
   count: number,
-  exclude: ReadonlySet<string> = new Set(),
+  seen: readonly string[] = [],
   difficulty?: WordDifficulty,
   maxWords?: number,
 ): string[] {
   const tier: readonly string[] = difficulty ? WORDS_BY_DIFFICULTY[difficulty] : WORD_LIST;
   const lengthOk = maxWords ? tier.filter((w) => promptWordCount(w) <= maxWords) : tier;
   const candidates = lengthOk.length >= count ? lengthOk : tier;
-  const fresh = candidates.filter((w) => !exclude.has(w));
+  const age = new Map<string, number>();
+  seen.forEach((w, i) => age.set(w, i));
+  const fresh = candidates.filter((w) => !age.has(w));
   if (fresh.length >= count) return sample(fresh, count);
-  // Top up with already-seen words so we still offer a full hand.
-  return [...fresh, ...sample(candidates.filter((w) => exclude.has(w)), count - fresh.length)];
+  // Top up from the oldest-seen half so the hand never repeats something from a few turns ago.
+  const stale = candidates.filter((w) => age.has(w)).sort((a, b) => age.get(a)! - age.get(b)!);
+  const need = count - fresh.length;
+  return [...fresh, ...sample(stale.slice(0, Math.max(need, Math.ceil(stale.length / 2))), need)];
+}
+
+/** Keeps only real prompts from an untrusted list (e.g. a client's seen-words history). */
+export function knownWords(words: unknown, max: number): string[] {
+  if (!Array.isArray(words)) return [];
+  return words.filter((w): w is string => typeof w === "string" && TIER_OF.has(w)).slice(-max);
 }

@@ -26,6 +26,20 @@ interface CanvasProps {
 
 const REMOTE_SCRIBBLE_IDLE_MS = 140;
 
+/**
+ * Ops only go out while connected. Socket.io would otherwise queue them and flush them
+ * on reconnect *before* we've re-claimed our seat, so the server would drop them; the
+ * artist re-sends the whole canvas once the server answers the rejoin instead.
+ */
+function send(op: DrawOp) {
+  if (socket.connected) socket.emit("draw_op", op);
+}
+
+function resendAll(ops: DrawOp[]) {
+  send({ type: "clear" });
+  for (const op of ops) send(op);
+}
+
 export const Canvas = forwardRef<CanvasHandle, CanvasProps>(function Canvas({ isArtist, active, mode = "game" }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -111,7 +125,18 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(function Canvas({ is
       if (op.type === "end") remoteLast.current.delete(op.strokeId);
     };
     socket.on("draw_op", onOp);
-    const unsubHistory = subscribeCanvasHistory((ops) => engineRef.current?.loadHistory(ops));
+    const unsubHistory = subscribeCanvasHistory((ops) => {
+      const engine = engineRef.current;
+      if (!engine) return;
+      // A reconnecting artist's own canvas is the truth: the server's copy is missing
+      // whatever was drawn while offline, so push ours back instead of loading theirs.
+      const { room, selfId } = useGameStore.getState();
+      if (mode === "game" && room?.phase === "DRAWING" && room.artistId === selfId && engine.getOps().length) {
+        resendAll(engine.getOps());
+        return;
+      }
+      engine.loadHistory(ops);
+    });
     return () => {
       socket.off("draw_op", onOp);
       unsubHistory();
@@ -123,14 +148,12 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(function Canvas({ is
     undo: () => {
       const engine = engineRef.current;
       if (!engine) return;
-      const remaining = engine.undoLastStroke();
-      socket.emit("draw_op", { type: "clear" });
-      for (const op of remaining) socket.emit("draw_op", op);
+      resendAll(engine.undoLastStroke());
       audio.playUndo();
     },
     clear: () => {
       engineRef.current?.reset();
-      socket.emit("draw_op", { type: "clear" });
+      send({ type: "clear" });
       audio.playTrash();
     },
   }));
@@ -145,7 +168,7 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(function Canvas({ is
 
   const emit = (op: DrawOp) => {
     engineRef.current?.commit(op);
-    socket.emit("draw_op", op);
+    send(op);
   };
 
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -211,7 +234,7 @@ export const Canvas = forwardRef<CanvasHandle, CanvasProps>(function Canvas({ is
     strokeIdRef.current = null;
     if (strokeId) {
       engineRef.current?.commit({ type: "end", strokeId });
-      socket.emit("draw_op", { type: "end", strokeId });
+      send({ type: "end", strokeId });
     }
   };
 

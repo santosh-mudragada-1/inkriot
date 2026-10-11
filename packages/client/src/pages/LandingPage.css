@@ -131,6 +131,12 @@
   position: relative;
 }
 
+.landing-waking {
+  position: relative;
+  margin-top: 14px;
+  color: var(--color-ink-soft);
+}
+
 .landing-side {
   display: flex;
   flex-direction: column;
@@ -245,7 +251,8 @@
   .landing-sub { order: 1; }
   .profile-card { order: 2; }
   .landing-cta { order: 3; }
-  .landing-error { order: 3; }
+  .landing-error,
+  .landing-waking { order: 3; }
   .sticker-book { order: 4; }
   .landing-copy .paper-doodles {
     display: none;

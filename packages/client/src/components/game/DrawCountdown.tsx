@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { DRAW_COUNTDOWN_MS } from "@inkriot/shared";
 import { useGameStore } from "../../store/useGameStore";
 import { audio } from "../../lib/audio/AudioManager";
+import { serverNow } from "../../lib/serverClock";
 import "./DrawCountdown.css";
 
 const STEPS = ["3", "2", "1", "GO!"];
@@ -38,7 +39,7 @@ export function DrawCountdown() {
       if (i === STEPS.length - 1) audio.playGo();
       else audio.playCountdownTick(i >= 2);
     };
-    const now = Date.now();
+    const now = serverNow();
     if (now > drawStartsAt + GO_LINGER_MS) return; // joined mid-turn — nothing to count
     STEPS.forEach((_, i) => {
       const at = countdownStart + i * STEP_MS;

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { serverNow } from "../lib/serverClock";
 
 /** Renders a server-authoritative deadline as a locally ticking countdown, no per-second network traffic needed. */
 export function useCountdown(endsAt: number | null | undefined): number {
@@ -10,10 +11,10 @@ export function useCountdown(endsAt: number | null | undefined): number {
     if (!endsAt) return;
     const id = setInterval(() => {
       setTick((t) => t + 1);
-      if (Date.now() >= endsAt) clearInterval(id);
+      if (serverNow() >= endsAt) clearInterval(id);
     }, 200);
     return () => clearInterval(id);
   }, [endsAt]);
 
-  return endsAt ? Math.max(0, endsAt - Date.now()) : 0;
+  return endsAt ? Math.max(0, endsAt - serverNow()) : 0;
 }

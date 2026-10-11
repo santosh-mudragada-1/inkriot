@@ -91,7 +91,6 @@ export class Room {
   artistId: string | null = null;
   currentWord: string | null = null;
   wordChoices: string[] | null = null;
-  usedWords = new Set<string>();
   /** Survives rematches, so a room of regulars doesn't keep drawing the same prompts. */
   private recentWords: string[] = [];
   canvasOps: DrawOp[] = [];
@@ -417,7 +416,6 @@ export class Room {
     if (this.players.size < 1) return;
     this.round = 0;
     this.turnIndex = -1;
-    this.usedWords.clear();
     for (const p of this.players.values()) {
       p.score = 0;
       p.streak = 0;
@@ -457,8 +455,9 @@ export class Room {
 
     this.artistId = artist.id;
     this.currentWord = null;
-    const seen = new Set([...this.usedWords, ...this.recentWords]);
-    this.wordChoices = pickRandomWords(WORD_CHOICE_COUNT, seen, this.gameMode, this.maxPromptWords);
+    this.wordChoices = pickRandomWords(WORD_CHOICE_COUNT, this.recentWords, this.gameMode, this.maxPromptWords);
+    // Cards that were offered but not picked count as seen too, or they keep coming back.
+    for (const w of this.wordChoices) this.rememberWord(w);
     this.canvasOps = [];
     this.guesses = [];
     this.solves = [];
@@ -480,7 +479,6 @@ export class Room {
     if (this.phase !== "WORD_SELECTION" || playerId !== this.artistId) return;
     if (!this.wordChoices?.includes(word)) return;
     this.currentWord = word;
-    this.usedWords.add(word);
     this.rememberWord(word);
     this.wordChoices = null;
     this.clearPhaseTimer();
@@ -490,6 +488,14 @@ export class Room {
     this.hintRevealedIndices.clear();
     this.setPhase("DRAWING", DRAW_COUNTDOWN_MS + this.drawSeconds * 1000, () => this.endRound());
     this.scheduleHints();
+  }
+
+  /** Fold in words a joining device has seen elsewhere; they count as older than anything this room showed. */
+  mergeSeenWords(words: string[]) {
+    const mine = new Set(this.recentWords);
+    const outside = words.filter((w) => !mine.has(w));
+    if (!outside.length) return;
+    this.recentWords = [...outside, ...this.recentWords].slice(-RECENT_WORDS_MEMORY);
   }
 
   private rememberWord(word: string) {
@@ -530,7 +536,8 @@ export class Room {
     if (this.phase === "LOBBY") return this.handleLobbyWallOp(playerId, op);
     if (playerId !== this.artistId || this.phase !== "DRAWING") return;
     // Small tolerance for clock skew between the artist's countdown and ours.
-    if (this.drawStartsAt && Date.now() < this.drawStartsAt - 400) return;
+    // Clients sync to our clock, so this only trims ops sent well inside the countdown.
+    if (this.drawStartsAt && Date.now() < this.drawStartsAt - 1000) return;
     this.touch();
     if (op.type === "clear") {
       this.canvasOps = [];
@@ -865,6 +872,7 @@ export class Room {
       wordChoices: isArtist ? this.wordChoices : null,
       phaseEndsAt: this.phaseEndsAt,
       drawStartsAt: this.phase === "DRAWING" ? this.drawStartsAt : null,
+      serverNow: Date.now(),
       drawSeconds: this.drawSeconds,
       guesses: this.guesses,
       awards: this.awards,

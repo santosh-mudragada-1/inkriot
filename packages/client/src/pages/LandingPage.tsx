@@ -34,7 +34,7 @@ export default function LandingPage() {
   const nickname = useProfile((s) => s.nickname);
   const [code, setCode] = useState("");
   const [nameError, setNameError] = useState<string | null>(null);
-  const { createRoom, joinRoom, pending, error, setError } = useRoomActions();
+  const { createRoom, joinRoom, pending, waking, error, setError } = useRoomActions();
 
   useEffect(() => {
     audio.setMusicMood("lobby");
@@ -132,6 +132,7 @@ export default function LandingPage() {
               </div>
             </form>
           </div>
+          {waking && !error && <p className="landing-waking hand">waking up the server — this can take up to a minute…</p>}
           {error && <p className="entry-error landing-error">{error}</p>}
         </section>
 

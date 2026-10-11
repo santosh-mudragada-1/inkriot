@@ -1,7 +1,8 @@
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { JoinRoomResult } from "@inkriot/shared";
-import { socket } from "../lib/socket";
+import { socket, waitForConnection } from "../lib/socket";
+import { loadSeenWords } from "../lib/seenWords";
 import { saveSession, saveNickname } from "../lib/session";
 import { useGameStore } from "../store/useGameStore";
 import { useProfile } from "../lib/profile";
@@ -17,9 +18,26 @@ function withTimeout<T>(fn: (cb: (res: T) => void) => void, ms = 6000): Promise<
   });
 }
 
+/** Render's free tier sleeps when idle and takes up to a minute to wake. */
+const WAKE_TIMEOUT_MS = 75_000;
+const SLOW_WAKE_HINT_MS = 2500;
+
 export function useRoomActions() {
   const navigate = useNavigate();
   const [pending, setPending] = useState(false);
+  /** True while we're waiting on a sleeping server, so the UI can say so instead of looking stuck. */
+  const [waking, setWaking] = useState(false);
+
+  const connect = useCallback(async () => {
+    if (socket.connected) return;
+    const hint = setTimeout(() => setWaking(true), SLOW_WAKE_HINT_MS);
+    try {
+      await waitForConnection(WAKE_TIMEOUT_MS);
+    } finally {
+      clearTimeout(hint);
+      setWaking(false);
+    }
+  }, []);
   const [error, setError] = useState<string | null>(null);
 
   const createRoom = useCallback(
@@ -27,7 +45,10 @@ export function useRoomActions() {
       setPending(true);
       setError(null);
       try {
-        const res = await withTimeout<JoinRoomResult>((cb) => socket.emit("create_room", { nickname, avatar: useProfile.getState().encoded() }, cb));
+        await connect();
+        const res = await withTimeout<JoinRoomResult>((cb) =>
+          socket.emit("create_room", { nickname, avatar: useProfile.getState().encoded(), recentWords: loadSeenWords() }, cb),
+        );
         if (!res.ok || !res.code || !res.sessionId || !res.playerId) {
           setError(res.error ?? "Something went wrong creating the room.");
           return;
@@ -44,7 +65,7 @@ export function useRoomActions() {
         setPending(false);
       }
     },
-    [navigate],
+    [navigate, connect],
   );
 
   const joinRoom = useCallback(
@@ -53,7 +74,10 @@ export function useRoomActions() {
       setError(null);
       try {
         const cleanCode = code.trim().toUpperCase();
-        const res = await withTimeout<JoinRoomResult>((cb) => socket.emit("join_room", { code: cleanCode, nickname, avatar: useProfile.getState().encoded() }, cb));
+        await connect();
+        const res = await withTimeout<JoinRoomResult>((cb) =>
+          socket.emit("join_room", { code: cleanCode, nickname, avatar: useProfile.getState().encoded(), recentWords: loadSeenWords() }, cb),
+        );
         if (!res.ok || !res.code || !res.sessionId || !res.playerId) {
           setError(res.error ?? "Couldn't join that room.");
           track("room_join_failed", { reason: (res.error ?? "unknown").slice(0, 60), via: "code" });
@@ -71,8 +95,8 @@ export function useRoomActions() {
         setPending(false);
       }
     },
-    [navigate],
+    [navigate, connect],
   );
 
-  return { createRoom, joinRoom, pending, error, setError };
+  return { createRoom, joinRoom, pending, waking, error, setError };
 }

@@ -1,13 +1,16 @@
 import { useEffect, useRef } from "react";
 import type { DrawOp, GuessMessage, ReactionEvent, RoomSnapshot, ScorePopup } from "@inkriot/shared";
 import { socket } from "../lib/socket";
-import { loadSession } from "../lib/session";
+import { loadSession, saveSession } from "../lib/session";
 import { useGameStore } from "../store/useGameStore";
 import { audio } from "../lib/audio/AudioManager";
 import { useProgress } from "../lib/progress";
 import { confetti, shake } from "../lib/juice";
 import { bufferCanvasHistory } from "../lib/canvasHistoryBuffer";
 import { captureError, track } from "../lib/myAnalytics";
+import { syncServerClock } from "../lib/serverClock";
+import { loadSeenWords, rememberSeenWords } from "../lib/seenWords";
+import { useProfile } from "../lib/profile";
 
 function revealedLetterCount(pattern: (string | null)[] | null): number {
   if (!pattern) return 0;
@@ -66,11 +69,24 @@ export function useSocketBridge() {
       const session = loadSession();
       if (activeCode && session?.code === activeCode) {
         socket.emit("rejoin_room", { code: activeCode, sessionId: session.sessionId }, (res) => {
-          if (res.ok && res.playerId) store().enterRoom(activeCode, res.playerId);
-          else {
-            store().setError("You were disconnected from the room.");
-            captureError(new Error("Rejoin after reconnect failed"), { reason: res.error ?? "unknown" });
-          }
+          if (res.ok && res.playerId) return store().enterRoom(activeCode, res.playerId);
+          // Offline past the grace period lost the seat, but the room may still be going:
+          // take a fresh seat (or a spectator spot) instead of dumping the player out.
+          const failure = res.error ?? "unknown";
+          socket.emit(
+            "join_room",
+            { code: activeCode, nickname: session.nickname, avatar: useProfile.getState().encoded(), recentWords: loadSeenWords() },
+            (joined) => {
+              if (joined.ok && joined.code && joined.sessionId && joined.playerId) {
+                saveSession({ code: joined.code, sessionId: joined.sessionId, playerId: joined.playerId, nickname: session.nickname });
+                store().enterRoom(joined.code, joined.playerId);
+                track("room_rejoined_fresh", { reason: failure.slice(0, 60) });
+                return;
+              }
+              store().setError("You were disconnected from the room.");
+              captureError(new Error("Rejoin after reconnect failed"), { reason: failure, join: joined.error ?? "unknown" });
+            },
+          );
         });
       }
     };
@@ -79,6 +95,9 @@ export function useSocketBridge() {
     const onRoomState = (snapshot: RoomSnapshot) => {
       const { activeCode } = store();
       if (activeCode && snapshot.code !== activeCode) return; // late packet from a room we left
+      syncServerClock(snapshot.serverNow);
+      // Everything shown to me counts as seen: my unpicked cards and each round's answer.
+      rememberSeenWords([...(snapshot.wordChoices ?? []), snapshot.revealedWord]);
       const prev = store().room;
       if (prevPlayerCount.current !== null && prev?.code === snapshot.code) {
         if (snapshot.players.length > prevPlayerCount.current) audio.playJoin();

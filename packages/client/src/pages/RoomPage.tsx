@@ -5,6 +5,7 @@ import { useGameStore } from "../store/useGameStore";
 import { socket } from "../lib/socket";
 import { loadSession, saveSession } from "../lib/session";
 import { useProfile } from "../lib/profile";
+import { loadSeenWords } from "../lib/seenWords";
 import { ProfileCard } from "../components/profile/ProfileCard";
 import { Logo } from "../components/common/Logo";
 import { Button } from "../components/common/Button";
@@ -62,7 +63,7 @@ export default function RoomPage() {
     if (!nickname.trim()) return setError("Pick a name first — it's how friends will spot you.");
     setState("joining");
     setError(null);
-    socket.emit("join_room", { code: roomCode, nickname: nickname.trim(), avatar: useProfile.getState().encoded() }, (res) => {
+    socket.emit("join_room", { code: roomCode, nickname: nickname.trim(), avatar: useProfile.getState().encoded(), recentWords: loadSeenWords() }, (res) => {
       if (res.ok && res.code && res.sessionId && res.playerId) {
         saveSession({ code: res.code, sessionId: res.sessionId, playerId: res.playerId, nickname: nickname.trim() });
         useGameStore.getState().enterRoom(res.code, res.playerId);
@@ -87,7 +88,9 @@ export default function RoomPage() {
       {(state === "checking" || state === "rejoining" || state === "joining") && (
         <div className="room-gate-loading">
           <motion.div className="room-gate-spinner" animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.9, ease: "linear" }} />
-          <span className="hand">{state === "joining" ? "squeezing you in…" : "finding the room…"}</span>
+          <span className="hand">
+            {state === "joining" ? "squeezing you in…" : connected ? "finding the room…" : "waking up the server — this can take up to a minute…"}
+          </span>
         </div>
       )}
       {state === "need-name" && (

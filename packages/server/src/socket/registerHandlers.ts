@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io";
-import { ClientToServerEvents, ServerToClientEvents } from "@inkriot/shared";
+import { ClientToServerEvents, DEVICE_WORD_MEMORY, ServerToClientEvents, knownWords } from "@inkriot/shared";
 import { RoomManager } from "../rooms/RoomManager.js";
 import { Room } from "../rooms/Room.js";
 
@@ -13,11 +13,12 @@ type IOSocket = Socket<ClientToServerEvents, ServerToClientEvents, Record<string
 
 export function registerHandlers(io: IOServer, manager: RoomManager) {
   io.on("connection", (socket: IOSocket) => {
-    socket.on("create_room", ({ nickname, avatar }, cb) => {
+    socket.on("create_room", ({ nickname, avatar, recentWords }, cb) => {
       leaveCurrentRoom(socket, manager);
       const room = manager.createRoom();
       const result = room.addPlayer(nickname, socket.id, avatar);
       if ("error" in result) return cb({ ok: false, error: result.error });
+      room.mergeSeenWords(knownWords(recentWords, DEVICE_WORD_MEMORY));
       socket.data.roomCode = room.code;
       socket.data.playerId = result.playerId;
       socket.join(room.code);
@@ -25,7 +26,7 @@ export function registerHandlers(io: IOServer, manager: RoomManager) {
       room.broadcastState();
     });
 
-    socket.on("join_room", ({ code, nickname, avatar, sessionId }, cb) => {
+    socket.on("join_room", ({ code, nickname, avatar, sessionId, recentWords }, cb) => {
       const room = manager.getRoom(code);
       if (!room) return cb({ ok: false, error: "Room not found. Check the code and try again." });
       leaveCurrentRoom(socket, manager, sessionId ? room.sessionToPlayer.get(sessionId) : undefined);
@@ -45,6 +46,7 @@ export function registerHandlers(io: IOServer, manager: RoomManager) {
 
       const result = room.addPlayer(nickname, socket.id, avatar);
       if ("error" in result) return cb({ ok: false, error: result.error });
+      room.mergeSeenWords(knownWords(recentWords, DEVICE_WORD_MEMORY));
       socket.data.roomCode = room.code;
       socket.data.playerId = result.playerId;
       socket.join(room.code);
@@ -151,5 +153,6 @@ function leaveCurrentRoom(socket: IOSocket, manager: RoomManager, keepPlayerId?:
 function sendJoinExtras(socket: IOSocket, room: Room, playerId: string) {
   room.broadcastState();
   const ops = room.getCanvasOps();
-  if (ops.length) socket.emit("canvas_history", ops);
+  // Mid-turn, always answer (even with nothing) so a reconnecting artist can push back strokes we never got.
+  if (ops.length || room.phase === "DRAWING") socket.emit("canvas_history", ops);
 }

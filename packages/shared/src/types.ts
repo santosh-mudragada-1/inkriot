@@ -150,6 +150,8 @@ export interface RoomSnapshot {
   phaseEndsAt: number | null;
   /** During DRAWING: when the pre-draw countdown ends and the pen goes live. */
   drawStartsAt: number | null;
+  /** The server's clock when this snapshot was sent; clients use it to correct for their own clock being off. */
+  serverNow: number;
   drawSeconds: number;
   guesses: GuessMessage[];
   awards: EndGameAward[] | null;
@@ -166,12 +168,15 @@ export interface RoomSnapshot {
 export interface CreateRoomPayload {
   nickname: string;
   avatar?: string;
+  /** Prompts this device has seen lately (any room), so a new room doesn't repeat them. */
+  recentWords?: string[];
 }
 export interface JoinRoomPayload {
   code: string;
   nickname: string;
   avatar?: string;
   sessionId?: string;
+  recentWords?: string[];
 }
 export interface JoinRoomResult {
   ok: boolean;

@@ -8,8 +8,14 @@ export const WORD_SELECTION_SECONDS = 12;
 export const ROUND_REVEAL_SECONDS = 5;
 /** The "3, 2, 1, GO!" before each drawing turn; the draw clock starts after it. */
 export const DRAW_COUNTDOWN_MS = 3400;
-/** Words a room remembers across rematches so regulars don't see repeats. */
-export const RECENT_WORDS_MEMORY = 450;
+/**
+ * Words a room remembers across rematches. Bigger than the whole word list on purpose:
+ * prompts then work like a shuffled deck — nothing repeats until every eligible word
+ * has been offered once.
+ */
+export const RECENT_WORDS_MEMORY = 1600;
+/** How many seen prompts each device remembers and hands to the rooms it joins (also the whole list). */
+export const DEVICE_WORD_MEMORY = 1600;
 export const SCOREBOARD_SECONDS = 6;
 export const POST_GAME_SECONDS = 30;
 
@@ -58,7 +64,8 @@ export const MAX_NICKNAME_LENGTH = 16;
 export const MAX_CHAT_HISTORY = 60;
 
 export const ROOM_IDLE_EXPIRY_MS = 1000 * 60 * 30;
-export const RECONNECT_GRACE_MS = 1000 * 60;
+/** How long an offline player keeps their seat (phones drop sockets whenever the app is backgrounded). */
+export const RECONNECT_GRACE_MS = 1000 * 60 * 3;
 /** A host who stays offline this long hands the room over, so nobody waits on a ghost. */
 export const HOST_HANDOFF_MS = 1000 * 15;
 export const MAX_SPECTATORS = 20;
